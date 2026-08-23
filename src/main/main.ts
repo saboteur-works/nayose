@@ -4,6 +4,8 @@ import { registerVaultHandlers } from './ipc/vault-handlers.ts';
 import { registerEntityHandlers } from './ipc/entity-handlers.ts';
 // Task 9 addition: read-only catalog-browsing IPC channels (window.nayose.catalog).
 import { registerCatalogHandlers } from './ipc/catalog-handlers.ts';
+// Task 11 addition: read-only field-provenance IPC channel (window.nayose.provenance).
+import { registerProvenanceHandlers } from './ipc/provenance-handlers.ts';
 
 const isDev = !app.isPackaged;
 
@@ -36,6 +38,7 @@ void app.whenReady().then(() => {
   registerVaultHandlers();
   registerEntityHandlers();
   registerCatalogHandlers();
+  registerProvenanceHandlers();
   createWindow();
 
   app.on('activate', () => {

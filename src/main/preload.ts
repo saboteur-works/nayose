@@ -15,6 +15,11 @@ import type {
   EntityCreateResult,
 } from '../shared/types/entity-ipc.ts';
 import type { AccountId, PartyId, RecordingId, ReleaseId, WorkId } from '../shared/types/entities.ts';
+// Task 11 addition: read-only field-provenance request/result types (see
+// shared/types/provenance-ipc.ts's header comment for why this is a
+// self-contained shared/types leaf module rather than a type-import from
+// ../main/ipc/provenance-handlers.ts).
+import type { FieldProvenance, GetFieldProvenanceRequest, ProvenanceResult } from '../shared/types/provenance-ipc.ts';
 // Task 9 addition: read-only catalog-browsing request/result types (see
 // entity-ipc.ts's header comment for why these live in shared/types
 // rather than being type-imported from ../main/ipc/catalog-handlers.ts).
@@ -83,6 +88,14 @@ const nayoseApi = {
       registrationId: RegistrationId,
     ): Promise<CatalogResult<RegistrationDetail | undefined>> =>
       ipcRenderer.invoke('catalog:getRegistrationDetail', registrationId),
+  },
+  // Task 11 addition: read-only field-provenance channel, operating on the
+  // currently-open vault (see ../main/vault/provenance-queries.ts).
+  provenance: {
+    getFieldProvenance: (
+      request: GetFieldProvenanceRequest,
+    ): Promise<ProvenanceResult<FieldProvenance>> =>
+      ipcRenderer.invoke('provenance:getFieldProvenance', request),
   },
 };
 
