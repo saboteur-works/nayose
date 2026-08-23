@@ -1,0 +1,65 @@
+// Registers the vault lifecycle IPC channels used by the renderer via
+// window.nayose.vault. Owns the Electron-specific bits (file dialogs); the
+// actual file format logic lives in ../vault/vault-file.ts.
+
+import { dialog, ipcMain } from 'electron';
+import type { VaultCloseResult, VaultCreateResult, VaultOpenResult } from '../../shared/types/vault.ts';
+import { createVaultFile, readVaultFile } from '../vault/vault-file.ts';
+
+const VAULT_DIALOG_FILTERS = [{ name: 'Nayose Vault', extensions: ['nayose', 'json'] }];
+
+export function registerVaultHandlers(): void {
+  ipcMain.handle('vault:create', async (): Promise<VaultCreateResult> => {
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      title: 'Create Nayose Vault',
+      buttonLabel: 'Create',
+      filters: VAULT_DIALOG_FILTERS,
+    });
+
+    if (canceled || !filePath) {
+      return { ok: false, canceled: true };
+    }
+
+    try {
+      const vault = await createVaultFile(filePath);
+      return { ok: true, path: filePath, vault };
+    } catch (err) {
+      return {
+        ok: false,
+        canceled: false,
+        error: {
+          reason: 'write-error',
+          message: `Could not create vault at ${filePath}: ${(err as Error).message}`,
+        },
+      };
+    }
+  });
+
+  ipcMain.handle('vault:open', async (): Promise<VaultOpenResult> => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      title: 'Open Nayose Vault',
+      buttonLabel: 'Open',
+      properties: ['openFile'],
+      filters: VAULT_DIALOG_FILTERS,
+    });
+
+    if (canceled || filePaths.length === 0) {
+      return { ok: false, canceled: true };
+    }
+
+    const filePath = filePaths[0];
+    const result = await readVaultFile(filePath);
+    if (!result.ok) {
+      return { ok: false, canceled: false, error: result.error };
+    }
+
+    return { ok: true, path: filePath, vault: result.vault };
+  });
+
+  ipcMain.handle('vault:close', async (): Promise<VaultCloseResult> => {
+    // No in-memory vault state exists yet (that arrives with the assertion
+    // log / entity model in Tasks 4-5); this simply acknowledges the
+    // renderer's close request so the IPC contract is stable for later use.
+    return { ok: true };
+  });
+}

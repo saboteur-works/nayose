@@ -3,9 +3,11 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "outDir": "dist/main",
-    "rootDir": "src/main",
-    "types": ["node"]
+    "outDir": "dist",
+    "rootDir": "src",
+    "types": ["node"],
+    "rewriteRelativeImportExtensions": true
   },
-  "include": ["src/main/**/*.ts"]
+  "include": ["src/main/**/*.ts", "src/shared/**/*.ts"],
+  "exclude": ["src/main/**/*.test.ts", "src/shared/**/*.test.ts"]
 }
