@@ -5,6 +5,10 @@
 import { dialog, ipcMain } from 'electron';
 import type { VaultCloseResult, VaultCreateResult, VaultOpenResult } from '../../shared/types/vault.ts';
 import { createVaultFile, readVaultFile } from '../vault/vault-file.ts';
+// Task 8 addition: keep the in-memory "currently open vault" session (see
+// ../vault/vault-session.ts) in sync with lifecycle events, so entity
+// creation handlers have a live AssertionLog to write into.
+import { clearSession, openSession } from '../vault/vault-session.ts';
 
 const VAULT_DIALOG_FILTERS = [{ name: 'Nayose Vault', extensions: ['nayose', 'json'] }];
 
@@ -22,6 +26,7 @@ export function registerVaultHandlers(): void {
 
     try {
       const vault = await createVaultFile(filePath);
+      openSession(filePath, vault);
       return { ok: true, path: filePath, vault };
     } catch (err) {
       return {
@@ -53,13 +58,14 @@ export function registerVaultHandlers(): void {
       return { ok: false, canceled: false, error: result.error };
     }
 
+    openSession(filePath, result.vault);
     return { ok: true, path: filePath, vault: result.vault };
   });
 
   ipcMain.handle('vault:close', async (): Promise<VaultCloseResult> => {
-    // No in-memory vault state exists yet (that arrives with the assertion
-    // log / entity model in Tasks 4-5); this simply acknowledges the
-    // renderer's close request so the IPC contract is stable for later use.
+    // Task 8 addition: drop the in-memory session so entity-creation
+    // handlers no longer see a stale open vault after close.
+    clearSession();
     return { ok: true };
   });
 }

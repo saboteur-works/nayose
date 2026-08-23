@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import { registerVaultHandlers } from './ipc/vault-handlers.ts';
+import { registerEntityHandlers } from './ipc/entity-handlers.ts';
 
 const isDev = !app.isPackaged;
 
@@ -31,6 +32,7 @@ function createWindow(): void {
 
 void app.whenReady().then(() => {
   registerVaultHandlers();
+  registerEntityHandlers();
   createWindow();
 
   app.on('activate', () => {
