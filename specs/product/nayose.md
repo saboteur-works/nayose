@@ -49,7 +49,7 @@ Holds roughly 20–200 recordings, distributes through a service such as DistroK
 - **US-7:** As a musician, I want to correct a value an import got wrong, so that a bad identifier is not permanent. [MVP]
 - **US-8:** As a musician, I want to add a work by hand, so that unreleased and non-distributed material can be recorded. [MVP]
 - **US-9:** As a musician, I want to export everything in the vault at no cost, so that leaving this product costs me nothing. [MVP]
-- **US-10:** As a musician, I want the file format documented publicly, so that my data is readable even if this product disappears. [MVP]
+- **US-10:** As a musician, I want to have the file format documented publicly, so that my data is readable even if this product disappears. [MVP]
 
 ## Functional Requirements
 
@@ -123,34 +123,41 @@ Holds roughly 20–200 recordings, distributes through a service such as DistroK
 
 ## Open Questions
 
-**OQ-1: What are the actual column shapes of the MLC, ASCAP, and BMI catalog exports?**
+**OQ-1: What are the actual column shapes of the MLC, ASCAP, and BMI catalog exports? — DEFERRED**
 **Impact:** Blocks FR-31 only. FR-8 is satisfiable without it — the generic mapper of FR-9 imports the file, and the user maps the columns themselves. What OQ-1 gates is whether that mapping ships pre-made. Existence of these exports is established; field-level structure requires an account to verify.
 **Latency, not difficulty:** the path to an answer is account signup, approval, export request, and email delivery, none of which is engineering work. Started late, it stalls Feature 4 for administrative reasons rather than technical ones.
 **Owner:** Product research
+**Becomes live at:** Feature 4 start.
 
-**OQ-2: How complete is streaming-service discography enumeration, given known unreliability for compilations and features on others' tracks?**
+**OQ-2: How complete is streaming-service discography enumeration, given known unreliability for compilations and features on others' tracks? — DEFERRED**
 **Impact:** Determines whether FR-6 and FR-7 deliver an authoritative catalog or a strong first pass requiring review, and therefore what the product may truthfully claim.
 **Owner:** Engineering spike
+**Note:** docs/ingest-research.md lines 103-105 record a directional lead — Spotify's Get Artist's Albums handles compilations and features-on-others'-tracks unreliably, making it a strong first pass rather than an authoritative enumeration — but this is a lead, not a measurement; the quantified check remains an unchecked item at docs/ingest-research.md lines 129-130. It constrains what FR-6 and FR-7 may truthfully claim, which is a copy decision to be made at Feature 5.
+**Becomes live at:** Feature 5 (streaming import).
 
-**OQ-3: Does any distributor besides Symphonic offer a catalog export, and does CD Baby?**
-**Impact:** Adds or removes presets under FR-9. DistroKid is verified to have none.
+**OQ-3: Does any distributor besides Symphonic offer a catalog export, and does CD Baby? — DEFERRED**
+**Impact:** Adds or removes presets under FR-9. DistroKid is verified to have none. CD Baby remains "Not established" in docs/ingest-research.md — an unchecked research item, not a resolved negative.
 **Owner:** Product research
+**Becomes live at:** Feature 3, when its preset set is scoped.
 
-**OQ-4: Where does acquisition urgency come from, given MLC recovery is a separate product?**
-**Impact:** No functional requirement, but the concept identifies this as the primary adoption risk. Affects onboarding design and launch positioning.
+**OQ-4: Where does acquisition urgency come from, given MLC recovery is a separate product? — DEFERRED**
+**Impact:** No functional requirement, but the concept identifies this as the primary adoption risk. Affects onboarding design and launch positioning. Verified: no functional requirement cites it, and none of Feature 1's 13 tasks touch onboarding copy or acquisition positioning. docs/concept.md line 89 frames this as the primary adoption risk, so deferral is a scheduling decision, not a dismissal.
 **Owner:** Product
+**Becomes live at:** When onboarding and launch positioning are designed — likely once Feature 1 is demoable, and necessarily before public launch.
 
 **OQ-5: Does the published format specification version independently of the application? — RESOLVED**
 **Resolution:** Yes. The published format carries its own version, independent of the application's. Superseded versions remain published, so a vault written today stays readable against its own specification regardless of how the format later evolves. See FR-26 through FR-29.
 **Residual:** The versioning scheme's granularity — what constitutes a breaking change, and whether older readers must tolerate newer minor versions — is an implementation choice, not a blocker. FR-29 makes the safe behaviour mandatory either way: an unsupported version fails loudly rather than being misread.
 
-**OQ-6: What is the minimum honest verification cadence the v1 extension can support?**
+**OQ-6: What is the minimum honest verification cadence the v1 extension can support? — DEFERRED**
 **Impact:** No MVP requirement, but determines what MVP copy may promise about the vault staying current.
 **Owner:** Product
+**Becomes live at:** The v1 milestone, when browser-extension cadence is designed.
 
-**OQ-7: What event triggers the shift from adoption-forward to substrate — an integration deadline, a user count, or a date?**
+**OQ-7: What event triggers the shift from adoption-forward to substrate — an integration deadline, a user count, or a date? — DEFERRED**
 **Impact:** Sequencing of the v2 application API. No MVP requirement.
 **Owner:** Product
+**Becomes live at:** v2 planning, when the read/write API's launch trigger is picked.
 
 ## Out of Scope (Deferred)
 

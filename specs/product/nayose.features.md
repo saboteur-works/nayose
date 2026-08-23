@@ -9,6 +9,7 @@
 **Requirements covered:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-15, FR-16, FR-17, FR-18, FR-19, FR-24, FR-25, FR-30, FR-32, FR-33
 **User stories:** US-5, US-6, US-7, US-8
 **Depends on:** none
+**Branch suggestion:** feat/vault-core
 **Notes:** The largest feature by requirement count, and deliberately not split. The assertion log (FR-3, FR-4), conflict tolerance (FR-5), and provenance display (FR-19) are one mechanism viewed from three angles — retrofitting any of them onto a mutable store is precisely the migration the concept exists to avoid. Splitting further would produce horizontal layers rather than shippable slices. Expect the task breakdown for this feature to be long; that is the correct place to absorb the size.
 
 ### Feature 2: Export and published format
@@ -17,6 +18,7 @@
 **Requirements covered:** FR-20, FR-21, FR-22, FR-23, FR-26, FR-27, FR-28, FR-29
 **User stories:** US-9, US-10
 **Depends on:** Feature 1
+**Branch suggestion:** feat/export-format
 **Notes:** FR-23 makes the independent reader a deliverable, not a test artifact — it is the evidence that the specification is sufficient. FR-28 (superseded versions stay published) is a standing obligation rather than a build task and should be recorded somewhere durable outside the codebase. Ships independently of all import features; nothing in ingest blocks it.
 
 ### Feature 3: File import with column mapping and match confirmation
@@ -25,6 +27,7 @@
 **Requirements covered:** FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14
 **User stories:** US-3, US-4
 **Depends on:** Feature 1
+**Branch suggestion:** feat/file-import
 **Notes:** Owns the shared import pipeline — preview, match, confirm, commit — that Features 4 and 5 reuse rather than reimplement. This is the "one mapper, N presets" decision from the ingest research made structural. The matching semantics here (FR-11 exact-identifier only, FR-12 no fuzzy titles, FR-13 sticky rejections) are the product's main defense against silent corruption and warrant the heaviest test coverage in the MVP.
 
 ### Feature 4: MLC catalog import preset
@@ -33,6 +36,7 @@
 **Requirements covered:** FR-31
 **User stories:** US-2
 **Depends on:** Feature 3
+**Branch suggestion:** feat/mlc-preset
 **Notes:** Only the preset is blocked by OQ-1. FR-8 — importing the file at all — is satisfied by Feature 3 the moment Feature 3 ships, since the user can map the columns themselves; this feature removes that manual step. The composition-layer semantics that previously sat here (shares, registration state) have moved to Feature 1 under FR-32 and FR-33, because they are entity-model shape rather than import detail, and the entity model is a one-way door. What remains is a preset definition. **Fallback if the account does not materialise:** FR-9 already requires savable presets, so the first user with a real export produces one and it is bundled in a later release — one release cycle, zero architecture. **Do not author the preset against the export tool's filter fields**; those are what the tool narrows by, not necessarily what it emits, and a preset built on inferred columns fails silently against a real file.
 
 ### Feature 5: Streaming discography import
@@ -41,6 +45,7 @@
 **Requirements covered:** FR-6, FR-7
 **User stories:** US-1
 **Depends on:** Feature 3
+**Branch suggestion:** feat/discography-import
 **Notes:** The only feature requiring network access, and the only path carrying the recording layer at MVP now that DistroKid is verified to offer no export. FR-6's explicit artist confirmation is a hard requirement, not a nicety — a wrong artist match silently poisons the vault. OQ-2 (enumeration completeness for compilations and features on others' tracks) determines what this feature may truthfully claim, not whether it can be built.
 
 ## Coverage check
