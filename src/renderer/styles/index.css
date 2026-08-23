@@ -1,0 +1,32 @@
+/*
+ * index.css — renderer stylesheet entry point.
+ *
+ * Layer order (per docs/products.md in the styles repo):
+ *   1. Tailwind v4
+ *   2. saboteur-base.css — brand @theme tokens, become Tailwind utilities
+ *      and CSS custom properties
+ *   3. nayose-theme.css — shadcn/ui variable remapping + any
+ *      Nayose-specific tokens
+ */
+@import 'tailwindcss';
+@config '../../../tailwind.config.ts';
+@import './saboteur-base.css';
+@import './nayose-theme.css';
+
+/*
+ * Global focus-visible rule per the styles repo's docs/color-rules.md
+ * ("Interactive states" section): keyboard focus uses a 2px solid
+ * interactive-red outline, never a glow or box-shadow. Applies globally
+ * rather than per-component so no primitive can silently diverge from it.
+ */
+:focus-visible {
+  outline: 2px solid var(--color-interactive);
+  outline-offset: 2px;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-brand-black);
+  color: var(--color-fg-primary);
+  font-family: var(--font-sans);
+}

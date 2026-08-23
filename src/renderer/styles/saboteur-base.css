@@ -1,0 +1,127 @@
+/*
+ * VENDORED COPY — do not hand-edit.
+ * Source of truth: ~/Repositories/saboteur-labs/saboteur-styles/styles/saboteur-base.css
+ * (a separate, read-only reference repo). This repo has no package/symlink
+ * link to that repo, so this file is a byte-for-byte copy kept in sync
+ * manually. Follow-up: replace this with a real package/workspace
+ * dependency once one exists, so this copy cannot drift silently.
+ *
+ * saboteur-base.css
+ * Shared brand tokens for all Saboteur products.
+ * Import this before any product-specific theme file.
+ *
+ * Usage in Tailwind v4:
+ *   @import "saboteur-base.css";
+ *   @import "offbeat-fm-theme.css"; — or getwrite-theme.css
+ *
+ * All products share these tokens. Product files extend or override
+ * where needed — they do not redefine what is already here.
+ */
+@theme {
+    /* ── BRAND COLORS ──
+     * Structural / surface tokens. These are NOT text colors — see the
+     * FOREGROUND (TEXT) section below for `color:` use on dark surfaces.
+     */
+    --color-brand-black: #0a0a0a; /* bg-brand-black    | Primary background. */
+    --color-brand-white: #f5f4f0; /* bg-brand-white    | Light background. Warm — not pure white. For text, use fg-primary. */
+    --color-brand-red: #d44040; /* bg-brand-red      | Signal Red. Structure and interaction only. */
+    --color-brand-mid: #6a6864; /* bg-brand-mid      | Structural grey. Swatches, dividers, decorative. NEVER text — use fg-* below. */
+    --color-brand-dim: #2e2e2c; /* bg-brand-dim      | Emphasized borders. NEVER text (1.45:1 on brand-black). */
+    --color-brand-rule: #1a1a18; /* bg-brand-rule     | Hairline dividers between dark surfaces. NEVER text. */
+    --color-brand-surface: #111110; /* bg-brand-surface  | Raised dark surfaces. */
+    --color-brand-surface2: #161614; /* bg-brand-surface2 | Deeper raised dark surfaces. */
+
+    /* ── BRAND FOREGROUND (TEXT) ──
+     * The only legal `color:` values on brand-black / brand-surface /
+     * brand-surface2. Each token has a documented contrast ratio against
+     * brand-black (#0a0a0a) and a WCAG verdict at body sizes.
+     *
+     * Saboteur defaults to dark. For text on a light surface (brand-white),
+     * use brand-black as the primary; we have not yet defined a full
+     * inverted text scale because the dark surface is the canonical case.
+     */
+    --color-fg-primary: #f5f4f0; /* text-fg-primary   | 17:1 — AAA. Headings, primary body, foreground emphasis. */
+    --color-fg-secondary: #aaa8a4; /* text-fg-secondary | 8.3:1 — AA Normal+. Default body, UI labels, descriptions. */
+    --color-fg-tertiary: #888680; /* text-fg-tertiary  | 5.5:1 — AA Normal. Captions, eyebrows, small mono metadata. */
+    --color-fg-faint: #6a6864; /* text-fg-faint     | 3.5:1 — AA Large ONLY. Use at ≥14pt bold or ≥18pt regular. */
+
+    /* ── BRAND FOREGROUND — INVERTED (TEXT ON LIGHT SURFACES) ──
+     * The only legal `color:` values on brand-white and other light surfaces.
+     * Contrast ratios documented against brand-white (#F5F4F0).
+     *
+     * fg-inv-primary shares its value with brand-black — same situation as
+     * fg-primary sharing its value with brand-white. Two tokens, one value;
+     * the semantic role is what distinguishes them.
+     */
+    --color-fg-inv-primary: #0a0a0a; /* text-fg-inv-primary   | 18:1 — AAA. Headings, primary body on light surfaces. */
+    --color-fg-inv-secondary: #4c4a47; /* text-fg-inv-secondary | 8.0:1 — AA Normal+. Default body, labels on light surfaces. */
+    --color-fg-inv-tertiary: #636160; /* text-fg-inv-tertiary  | 5.6:1 — AA Normal. Captions, metadata on light surfaces. */
+    --color-fg-inv-faint: #83817b; /* text-fg-inv-faint     | 3.5:1 — AA Large ONLY. Use at ≥14pt bold or ≥18pt regular. */
+
+    /* ── BRAND INTERACTIVE ──
+     * Semantic tokens for interactive states. These describe behavior, not structure.
+     * Use these tokens instead of brand-* structural tokens when expressing interaction.
+     */
+    --color-interactive: #d44040; /* bg-interactive    | Focus rings, active indicators, primary CTAs. Semantic alias for brand-red in interaction contexts. */
+    --color-surface-hover: #111110; /* bg-surface-hover  | Hover state bg for interactive elements on brand-black. Shares value with brand-surface today. */
+    --color-surface-active: #161614; /* bg-surface-active | Active/pressed bg for interactive elements on brand-black. Shares value with brand-surface2 today. */
+
+    /* ── BRAND TYPOGRAPHY ── */
+    --font-display:
+        "IBM Plex Sans Condensed", sans-serif; /* Wordmarks, major headings */
+    --font-sans: "IBM Plex Sans", sans-serif; /* UI, body */
+    --font-mono: "IBM Plex Mono", monospace; /* Labels, metadata, descriptors */
+    --font-serif: "IBM Plex Serif", serif; /* GetWrite editor surface only */
+
+    /* ── BRAND FONT WEIGHTS ── */
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+
+    /* ── BRAND LETTER SPACING ── */
+    --tracking-wordmark: -0.04em; /* tracking-wordmark   | Condensed wordmark at hero */
+    --tracking-display: -0.03em; /* tracking-display    | Display headings */
+    --tracking-heading: -0.02em; /* tracking-heading    | h1 level */
+    --tracking-body: 0em; /* tracking-body       | Default body */
+    --tracking-label: 0.14em; /* tracking-label      | Mono labels */
+    --tracking-label-wide: 0.18em; /* tracking-label-wide | Mono descriptors */
+    --tracking-label-xl: 0.22em; /* tracking-label-xl   | Mono hero descriptors */
+    --tracking-micro: 0.1em; /* tracking-micro      | Small mono */
+
+    /* ── BRAND SPACING ── */
+    /* All multiples of 4px base unit */
+    --spacing-1: 4px;
+    --spacing-2: 8px;
+    --spacing-3: 12px;
+    --spacing-4: 16px;
+    --spacing-5: 20px;
+    --spacing-6: 24px;
+    --spacing-8: 32px;
+    --spacing-10: 40px;
+    --spacing-12: 48px;
+    --spacing-16: 64px;
+    --spacing-20: 80px;
+
+    /* ── BRAND BORDER RADIUS ── */
+    --radius-sm: 3px; /* radius-sm  | Tags, chips, badges */
+    --radius-md: 5px; /* radius-md  | Buttons, inputs */
+    --radius-lg: 8px; /* radius-lg  | Cards */
+    --radius-xl: 12px; /* radius-xl  | Modals, large containers */
+
+    /* ── BRAND BORDERS ── */
+    --border-width-hairline: 0.5px; /* border-hairline | Default UI borders */
+    --border-width-thin: 1px; /* border-thin     | Emphasized borders */
+    --border-width-bar: 3px; /* border-bar      | Sub-brand left bars */
+    --border-width-mark: 4px; /* border-mark     | Primary mark left bar */
+
+    /* ── BRAND LINE HEIGHT ── */
+    --leading-tight: 1.05; /* leading-tight     | Hero/display headings */
+    --leading-snug: 1.3; /* leading-snug      | h1, h2 */
+    --leading-normal: 1.6; /* leading-normal    | h3, UI body */
+    --leading-relaxed: 1.8; /* leading-relaxed   | Descriptions, small body */
+    --leading-editorial: 2; /* leading-editorial | Wide reading mode */
+
+    /* ── BRAND TRANSITIONS ── */
+    --transition-fast: 150ms ease; /* transition-fast   | Color, border, opacity */
+    --transition-normal: 200ms ease; /* transition-normal | Layout, transform */
+}

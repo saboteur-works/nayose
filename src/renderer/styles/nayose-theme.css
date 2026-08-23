@@ -1,0 +1,109 @@
+/*
+ * nayose-theme.css — Nayose product theme.
+ * Extends saboteur-base.css (imported first, in index.css). Per
+ * docs/products.md ("Adding a new product"): define only what differs
+ * from the base, and namespace anything Nayose-specific under
+ * `--color-nayose-*` rather than redefining `--color-brand-*` or
+ * `--color-fg-*`.
+ *
+ * Section 1 below is the substance of this file: shadcn/ui ships its own
+ * token vocabulary (--background, --foreground, --primary, --radius, ...)
+ * which does not match Saboteur's. Every shadcn-expected variable name is
+ * aliased here to a Saboteur brand token — never a new value. Taking
+ * shadcn's own defaults (oklch grays/blues) would silently violate
+ * docs/color-rules.md's closed palette ("Any new chromatic color" is
+ * forbidden; red is the only chromatic token).
+ *
+ * Color tempo: Nayose is a local-first desktop vault, closest in kind to
+ * GetWrite (studio-shaped, restrained red) rather than OffBeat-FM
+ * (red-forward). This file maps shadcn's `--primary` to the interactive
+ * red token so a filled "primary" affordance is available where the
+ * interface genuinely needs one, but per docs/products.md's GetWrite
+ * guidance ("do not flood red"), product surfaces should still prefer the
+ * outline/secondary button variant for everyday actions and reserve the
+ * filled primary for a true single call-to-action per screen (see
+ * Buttons.stories.js Variants: "never two primary buttons on one
+ * screen").
+ */
+
+:root {
+  /* shadcn surface roles -> Saboteur structural/text tokens */
+  --background: var(--color-brand-black);
+  --foreground: var(--color-fg-primary);
+
+  --card: var(--color-brand-surface);
+  --card-foreground: var(--color-fg-primary);
+
+  --popover: var(--color-brand-surface2);
+  --popover-foreground: var(--color-fg-primary);
+
+  /* shadcn interactive roles -> Saboteur interactive/brand tokens */
+  --primary: var(--color-interactive);
+  --primary-foreground: var(--color-fg-primary);
+
+  --secondary: var(--color-brand-surface2);
+  --secondary-foreground: var(--color-fg-secondary);
+
+  --muted: var(--color-brand-surface);
+  --muted-foreground: var(--color-fg-tertiary);
+
+  --accent: var(--color-brand-surface2);
+  --accent-foreground: var(--color-fg-primary);
+
+  /*
+   * Signal Red is the only chromatic token in the system
+   * (docs/color-rules.md: "Red is the only chromatic token. Do not
+   * introduce another chromatic color."). shadcn's destructive role
+   * reuses it rather than adding a second chromatic value.
+   */
+  --destructive: var(--color-brand-red);
+  --destructive-foreground: var(--color-fg-primary);
+
+  /* Default UI border/input treatment matches the hairline-on-dim
+     pattern used throughout Examples/UI Primitives (Inputs, Cards). */
+  --border: var(--color-brand-dim);
+  --input: var(--color-brand-dim);
+
+  /* Focus ring color; see the global :focus-visible rule in index.css. */
+  --ring: var(--color-interactive);
+}
+
+/*
+ * Register the aliases above as Tailwind v4 theme colors so utilities
+ * like `bg-background`, `text-foreground`, `bg-primary`,
+ * `text-primary-foreground`, `border-border`, etc. resolve to the
+ * Saboteur values assigned above instead of shadcn's own defaults.
+ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/*
+ * Section 2: Nayose-specific tokens.
+ *
+ * Nothing in this task's scope (button/card/input/badge) needs a value
+ * that isn't already a generic Saboteur brand token, so no
+ * `--color-nayose-*` token is defined yet. The namespace convention is
+ * documented here so later tasks (e.g. Task 11's override marking, Task
+ * 9/14's share-integrity indicator) add tokens under `--color-nayose-*`
+ * in this file rather than inventing new `--color-brand-*` or bare hex
+ * values.
+ */
