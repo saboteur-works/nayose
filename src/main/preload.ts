@@ -13,6 +13,23 @@ import type {
   EntityCreateResult,
 } from '../shared/types/entity-ipc.ts';
 import type { AccountId, PartyId, RecordingId, ReleaseId, WorkId } from '../shared/types/entities.ts';
+// Task 9 addition: read-only catalog-browsing request/result types (see
+// entity-ipc.ts's header comment for why these live in shared/types
+// rather than being type-imported from ../main/ipc/catalog-handlers.ts).
+import type {
+  CatalogResult,
+  PartyDetail,
+  PartyListItem,
+  RecordingDetail,
+  RecordingListItem,
+  RegistrationDetail,
+  RegistrationId,
+  RegistrationListItem,
+  ReleaseDetail,
+  ReleaseListItem,
+  WorkDetail,
+  WorkListItem,
+} from '../shared/types/catalog-ipc.ts';
 
 // Safely-scoped bridge: the renderer only ever sees the `nayose` namespace
 // below, never the raw ipcRenderer/electron APIs. Node integration stays off
@@ -37,6 +54,29 @@ const nayoseApi = {
       ipcRenderer.invoke('entity:createRecording', request),
     createRelease: (request: CreateReleaseRequest): Promise<EntityCreateResult<ReleaseId>> =>
       ipcRenderer.invoke('entity:createRelease', request),
+  },
+  // Task 9 addition: read-only catalog-browsing channels, operating on the
+  // currently-open vault (see ../main/vault/catalog-queries.ts).
+  catalog: {
+    listWorks: (): Promise<CatalogResult<WorkListItem[]>> => ipcRenderer.invoke('catalog:listWorks'),
+    listRecordings: (): Promise<CatalogResult<RecordingListItem[]>> =>
+      ipcRenderer.invoke('catalog:listRecordings'),
+    listReleases: (): Promise<CatalogResult<ReleaseListItem[]>> => ipcRenderer.invoke('catalog:listReleases'),
+    listParties: (): Promise<CatalogResult<PartyListItem[]>> => ipcRenderer.invoke('catalog:listParties'),
+    listRegistrations: (): Promise<CatalogResult<RegistrationListItem[]>> =>
+      ipcRenderer.invoke('catalog:listRegistrations'),
+    getWorkDetail: (workId: WorkId): Promise<CatalogResult<WorkDetail | undefined>> =>
+      ipcRenderer.invoke('catalog:getWorkDetail', workId),
+    getRecordingDetail: (recordingId: RecordingId): Promise<CatalogResult<RecordingDetail | undefined>> =>
+      ipcRenderer.invoke('catalog:getRecordingDetail', recordingId),
+    getReleaseDetail: (releaseId: ReleaseId): Promise<CatalogResult<ReleaseDetail | undefined>> =>
+      ipcRenderer.invoke('catalog:getReleaseDetail', releaseId),
+    getPartyDetail: (partyId: PartyId): Promise<CatalogResult<PartyDetail | undefined>> =>
+      ipcRenderer.invoke('catalog:getPartyDetail', partyId),
+    getRegistrationDetail: (
+      registrationId: RegistrationId,
+    ): Promise<CatalogResult<RegistrationDetail | undefined>> =>
+      ipcRenderer.invoke('catalog:getRegistrationDetail', registrationId),
   },
 };
 

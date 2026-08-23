@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
 import { EntityCreateView } from './views/entity-create';
+// Task 9 addition: catalog browse/navigation view.
+import { CatalogView } from './views/catalog';
 
 export function App(): JSX.Element {
   const [pingResult, setPingResult] = useState<string>('');
@@ -18,6 +20,7 @@ export function App(): JSX.Element {
       <p data-testid="ping-result">{pingResult}</p>
 
       <EntityCreateView />
+      <CatalogView />
     </div>
   );
 }

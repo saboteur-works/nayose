@@ -2,6 +2,8 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import { registerVaultHandlers } from './ipc/vault-handlers.ts';
 import { registerEntityHandlers } from './ipc/entity-handlers.ts';
+// Task 9 addition: read-only catalog-browsing IPC channels (window.nayose.catalog).
+import { registerCatalogHandlers } from './ipc/catalog-handlers.ts';
 
 const isDev = !app.isPackaged;
 
@@ -33,6 +35,7 @@ function createWindow(): void {
 void app.whenReady().then(() => {
   registerVaultHandlers();
   registerEntityHandlers();
+  registerCatalogHandlers();
   createWindow();
 
   app.on('activate', () => {
