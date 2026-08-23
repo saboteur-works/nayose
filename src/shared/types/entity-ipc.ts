@@ -40,4 +40,21 @@ export type EntityCreateResult<TId> =
   | { ok: true; id: TId }
   | { ok: false; error: { message: string } };
 
+// Task 10 addition: additive field editing. Editing a field never mutates or
+// deletes an existing assertion — it always appends a new one (see
+// ../../main/ipc/entity-handlers.ts's `entity:editField` handler, which is
+// the only place this request type is consumed, via `appendAssertion`).
+//
+// `value` is intentionally `unknown`, mirroring `Assertion['value']` in
+// ./assertion.ts: fields can hold strings, numbers, Fraction objects,
+// arrays, etc., and this IPC surface must not narrow that.
+export interface EditFieldRequest {
+  entityId: string;
+  fieldName: string;
+  value: unknown;
+}
+
+/** Result of an `entity:editField` call: the id of the newly appended assertion. */
+export type EditFieldResult = EntityCreateResult<string>;
+
 export type { AccountId, PartyId, RecordingId, ReleaseId, WorkId };

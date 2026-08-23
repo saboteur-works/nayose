@@ -10,6 +10,8 @@ import type {
   CreateRecordingRequest,
   CreateReleaseRequest,
   CreateWorkRequest,
+  EditFieldRequest,
+  EditFieldResult,
   EntityCreateResult,
 } from '../shared/types/entity-ipc.ts';
 import type { AccountId, PartyId, RecordingId, ReleaseId, WorkId } from '../shared/types/entities.ts';
@@ -54,6 +56,10 @@ const nayoseApi = {
       ipcRenderer.invoke('entity:createRecording', request),
     createRelease: (request: CreateReleaseRequest): Promise<EntityCreateResult<ReleaseId>> =>
       ipcRenderer.invoke('entity:createRelease', request),
+    // Task 10 addition: additive field editing (appends a new user-asserted
+    // assertion; never mutates or deletes an existing one).
+    editField: (request: EditFieldRequest): Promise<EditFieldResult> =>
+      ipcRenderer.invoke('entity:editField', request),
   },
   // Task 9 addition: read-only catalog-browsing channels, operating on the
   // currently-open vault (see ../main/vault/catalog-queries.ts).

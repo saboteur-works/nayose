@@ -10,6 +10,7 @@
 
 import { ipcMain } from 'electron';
 
+import { appendAssertion } from '../vault/assertion-log.ts';
 import {
   createParty,
   createRecording,
@@ -24,6 +25,8 @@ import type {
   CreateRecordingRequest,
   CreateReleaseRequest,
   CreateWorkRequest,
+  EditFieldRequest,
+  EditFieldResult,
   EntityCreateResult,
 } from '../../shared/types/entity-ipc.ts';
 
@@ -120,6 +123,31 @@ export function registerEntityHandlers(): void {
       });
       await persistSession(session);
       return { ok: true, id };
+    },
+  );
+
+  // Task 10 addition: additive field editing. This NEVER updates or deletes
+  // an existing assertion (assertion-log.ts has no such operation) — it
+  // only ever appends a new user-asserted assertion for (entityId,
+  // fieldName). The prior assertion(s) remain untouched and fully
+  // retrievable via projection.ts's getFieldHistory/getAssertionsForField.
+  ipcMain.handle(
+    'entity:editField',
+    async (_event, request: EditFieldRequest): Promise<EditFieldResult> => {
+      const session = getSession();
+      if (!session) {
+        return { ok: false, error: { message: NO_OPEN_VAULT_ERROR } };
+      }
+
+      const accountId = ensureAccount(session.log);
+      const assertion = appendAssertion(session.log, {
+        ...userProvenance(accountId),
+        entityId: request.entityId,
+        fieldName: request.fieldName,
+        value: request.value,
+      });
+      await persistSession(session);
+      return { ok: true, id: assertion.id };
     },
   );
 }
