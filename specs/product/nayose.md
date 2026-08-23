@@ -62,12 +62,15 @@ Holds roughly 20–200 recordings, distributes through a service such as DistroK
 - **FR-3:** Every stored value MUST be recorded as an assertion carrying actor, timestamp, source, and source class of either registry-issued or user-asserted. [US-5]
 - **FR-4:** The system MUST derive a field's current value from its assertions, and MUST be able to retrieve the full assertion history for any field. [US-5]
 - **FR-5:** The vault MUST be able to hold conflicting assertions about the same field without discarding either. [US-4]
+- **FR-32:** The vault MUST be able to represent a party's fractional share in a work, and a work's registration state with a named registry, as first-class relationships rather than freeform values — each recorded as an assertion like any other value. [US-2]
+- **FR-33:** The system MUST detect when the shares recorded against a work do not sum to unity, and MUST surface that condition wherever the work's shares are shown. It MUST NOT refuse to store an incomplete or over-allocated share set — a catalog whose splits are genuinely unresolved must remain recordable. [US-2]
 
 **Ingest**
 
 - **FR-6:** Users MUST be able to import a released discography from a streaming service API given an artist identity, and the system MUST require explicit user confirmation of that identity before writing any assertion. [US-1]
 - **FR-7:** Streaming import MUST capture ISRC per recording and UPC per release wherever the source provides them. [US-1]
-- **FR-8:** Users MUST be able to import an MLC catalog export file. [US-2] [BLOCKED: OQ-1]
+- **FR-8:** Users MUST be able to import an MLC catalog export file. [US-2]
+- **FR-31:** The system MUST provide a built-in column-mapping preset for the MLC catalog export, so that the user is not required to map its columns by hand. [US-2] [BLOCKED: OQ-1]
 - **FR-9:** Users MUST be able to import any CSV or XLSX file by mapping its columns to vault fields, and MUST be able to save a mapping as a reusable preset. [US-3]
 - **FR-10:** Every import MUST present a preview of proposed changes before any assertion is written, and MUST be cancellable with zero writes. [US-4]
 - **FR-11:** The system MUST automatically link records across sources only on exact match of a strong identifier (ISRC, ISWC, or UPC); all other match candidates MUST be queued for user confirmation. [US-4]
@@ -80,6 +83,7 @@ Holds roughly 20–200 recordings, distributes through a service such as DistroK
 - **FR-15:** Users MUST be able to create works, recordings, releases, and parties by hand. [US-8]
 - **FR-16:** Users MUST be able to edit any field; an edit MUST be recorded as a new user-asserted assertion and MUST NOT delete or overwrite an existing registry-issued assertion. [US-7]
 - **FR-17:** The system MUST warn the user when a manual edit contradicts a registry-issued value, and MUST identify the issuing source in that warning. [US-7]
+- **FR-30:** A field whose current value is a user-asserted assertion overriding a retained registry-issued assertion MUST be marked as such wherever that value is displayed, and the marking MUST be present without requiring an interaction. [US-7]
 
 **Catalog view**
 
@@ -114,12 +118,14 @@ Holds roughly 20–200 recordings, distributes through a service such as DistroK
 - Export must never be gated behind payment, account creation, or a feature tier — the custody claim depends on it.
 - The format is a published artifact with its own lifecycle: it versions independently of the application, and superseded versions stay available, because a vault that outlives the product is only readable if its specification does too.
 - Wrong values are a trust liability rather than a cosmetic defect: any automatic linking must fail toward asking rather than toward merging.
+- Conflict resolution is fixed: when a user-asserted assertion and a registry-issued assertion disagree about a field, the user's value is the current value, the registry-issued assertion is retained, and the field is marked as overriding a registry value wherever it appears. The user owns their record; the vault never silently overrides them, and never lets the override go unnoticed.
 - Import must tolerate sources that provide only a subset of fields; partial data must be storable without placeholder values.
 
 ## Open Questions
 
 **OQ-1: What are the actual column shapes of the MLC, ASCAP, and BMI catalog exports?**
-**Impact:** Blocks FR-8 and constrains the preset definitions behind FR-9. Existence of these exports is established; field-level structure requires an account to verify.
+**Impact:** Blocks FR-31 only. FR-8 is satisfiable without it — the generic mapper of FR-9 imports the file, and the user maps the columns themselves. What OQ-1 gates is whether that mapping ships pre-made. Existence of these exports is established; field-level structure requires an account to verify.
+**Latency, not difficulty:** the path to an answer is account signup, approval, export request, and email delivery, none of which is engineering work. Started late, it stalls Feature 4 for administrative reasons rather than technical ones.
 **Owner:** Product research
 
 **OQ-2: How complete is streaming-service discography enumeration, given known unreliability for compilations and features on others' tracks?**

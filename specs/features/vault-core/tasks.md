@@ -1,7 +1,7 @@
 # Tasks: Feature 1 — Vault with hand-entered catalog
 
 **Feature source:** `specs/product/nayose.features.md`
-**Spec source:** `specs/product/nayose.md` — FR-1–FR-5, FR-15–FR-19, FR-24, FR-25 (US-5, US-6, US-7, US-8)
+**Spec source:** `specs/product/nayose.md` — FR-1–FR-5, FR-15–FR-19, FR-24, FR-25, FR-30, FR-32, FR-33 (US-2, US-5, US-6, US-7, US-8)
 **Branch:** `feat/vault-core`
 **Granularity:** story points (1/2/3/5/8)
 
@@ -49,19 +49,19 @@
 ### Task 5: Entity model
 **What:** Party, Account, Work, Recording, Release, and Registration as distinct entity types over the assertion log.
 **Files:** `src/main/vault/entities.ts`, `src/shared/types/entities.ts`
-**Done when:** All six types are defined and instantiable; Party and Account are separate types with no shared identity; creating a vault produces exactly one Account and at least one Party; relationships between works, recordings, releases, and parties are representable.
+**Done when:** All six types are defined and instantiable; Party and Account are separate types with no shared identity; creating a vault produces exactly one Account and at least one Party; relationships between works, recordings, releases, and parties are representable; a party's fractional share in a work is representable as a relationship carrying the fraction, and a work's registration state with a named registry is representable; both are storable while incomplete — a share set that does not sum to unity, or a registration whose state is unknown, persists without a placeholder value.
 **Depends on:** 4
-**Estimate:** 3
-**Notes:** Satisfies FR-1 and FR-2. Party/Account separation is the one-way door identified in the concept — a shared type here is a rewrite for the label tier, not a refactor.
+**Estimate:** 5
+**Notes:** Satisfies FR-1, FR-2, and FR-32. Party/Account separation is the one-way door identified in the concept — a shared type here is a rewrite for the label tier, not a refactor. **Shares are modelled here even though nothing populates them until Feature 4.** A share is a three-way fact (party, work, fraction), not a string on a work; modelled as a string it cannot be validated, summed, or conflict-resolved, and the annotations layer swallows it. Store a fraction rather than a percentage — MLC and PRO sources disagree on percent, decimal, and twelfths, and a percentage-typed field bakes a lossy conversion into the boundary. Adding this relationship after the log is populated rewrites history the concept exists to preserve, so it lands now and stays empty until ingest arrives. Estimate raised from 3 to 5 on that basis.
 **Done:** [ ]
 
 ### Task 6: Projection and conflict retention
 **What:** Derive a field's current value from its assertions, retain conflicting assertions, and expose full per-field history.
 **Files:** `src/main/vault/projection.ts`, `src/shared/types/projection.ts`
-**Done when:** Given multiple assertions on one field, the current value resolves deterministically by a documented rule; two conflicting assertions are both retrievable after resolution; full history for any field is queryable in order.
+**Done when:** Given multiple assertions on one field, the current value resolves deterministically by a documented rule; two conflicting assertions are both retrievable after resolution; full history for any field is queryable in order; a field whose current user-asserted value contradicts a retained registry-issued assertion reports that override, and the superseded registry value and its issuing source, without a second query.
 **Depends on:** 4, 5
 **Estimate:** 5
-**Notes:** Satisfies FR-4 and FR-5. **Contains an unresolved design decision:** the spec does not state which assertion wins when a user-asserted value conflicts with a registry-issued one. FR-16 requires the registry-issued assertion be retained and FR-17 requires warning on contradiction, which together imply the user's value displays as current while the registry value persists and is flagged — but that is inference, not specification. Settle it explicitly here and record the rule, because every display surface inherits it.
+**Notes:** Satisfies FR-4 and FR-5. **The conflict-resolution rule is now decided and specified** (product spec, Constraints; FR-30): when a user-asserted assertion and a registry-issued assertion disagree about a field, the user's assertion is the current value, the registry-issued assertion is retained, and the projection MUST expose the override so display surfaces can mark it. Implement that as part of the projection's return shape — an overridden-registry-value flag alongside the current value — rather than leaving each consumer to re-derive it from the history.
 **Done:** [ ]
 
 ### Task 7: Manual entity creation
@@ -94,10 +94,10 @@
 ### Task 10: Provenance display
 **What:** Surface where any displayed value came from, and its history.
 **Files:** `src/renderer/components/provenance-view.tsx`, `src/main/ipc/provenance-handlers.ts`
-**Done when:** From any value shown in the interface, a user reaches its source, actor, timestamp, and source class within one interaction; the full assertion history for that field is viewable from the same place.
+**Done when:** From any value shown in the interface, a user reaches its source, actor, timestamp, and source class within one interaction; the full assertion history for that field is viewable from the same place. A value that is a user-asserted override of a retained registry-issued assertion carries a persistent visual marking wherever it is displayed — list, detail, and export preview — with no interaction required to see it, and the superseded registry value and its issuing source are reachable within one interaction from that marking.
 **Depends on:** 6, 8
-**Estimate:** 3
-**Notes:** Satisfies FR-19. The one-interaction bound is the requirement — a provenance view reachable only through a separate screen does not meet it.
+**Estimate:** 5
+**Notes:** Satisfies FR-19 and FR-30. The one-interaction bound is the requirement — a provenance view reachable only through a separate screen does not meet it. FR-30 is the stricter half: the override marking is *zero*-interaction and must survive every surface a value appears on, so it belongs to the shared value-rendering component rather than to individual views. Estimate raised from 3 to 5 on that basis. The marking needs a Saboteur token treatment agreed in Task 2 — it is a standing state, not an alert, so an alarm colour would be wrong.
 **Done:** [ ]
 
 ### Task 11: Contradiction warning on edit
@@ -106,7 +106,7 @@
 **Done when:** Editing a field whose current value is registry-issued presents a warning identifying the source before the assertion is written; the user can proceed or cancel; cancelling writes nothing.
 **Depends on:** 9, 10
 **Estimate:** 2
-**Notes:** Satisfies FR-17. **Not naturally testable in this feature** — no import exists yet, so no registry-issued assertions can arise through normal use. Build against seeded fixtures with source class set to registry-issued, and treat those fixtures as a deliverable, since Features 4 and 5 will need them too.
+**Notes:** Satisfies FR-17. **Not naturally testable in this feature** — no import exists yet, so no registry-issued assertions can arise through normal use. Build against seeded fixtures with source class set to registry-issued, and treat those fixtures as a deliverable, since Features 4 and 5 will need them too. Those fixtures must carry share and registration-state data as well as plain identifiers — otherwise Feature 4 arrives with no seeded example of the shape it is importing into, and Task 13 has nothing to exercise.
 **Done:** [ ]
 
 ### Task 12: Offline guarantee
@@ -118,14 +118,24 @@
 **Notes:** Satisfies FR-25. The automated check matters more than the manual verification — this feature is offline by default, but Feature 5 introduces the first network client, and this guard is what keeps that from leaking into the vault core.
 **Done:** [ ]
 
+### Task 13: Share integrity surfacing
+**What:** Detect share sets that do not sum to unity and surface the condition wherever a work's shares are shown.
+**Files:** `src/main/vault/share-integrity.ts`, `src/renderer/components/share-list.tsx`
+**Done when:** A work whose recorded shares sum to less than or more than unity displays that condition wherever its shares appear, stating the actual total; a work with no shares recorded is not reported as under-allocated; storing or editing a non-summing share set is never blocked or rejected; the check runs over projected current values rather than raw assertions.
+**Depends on:** 5, 8
+**Estimate:** 2
+**Notes:** Satisfies FR-33. **This detects and reports; it never validates.** Refusing to store a set summing to 87% refuses to store the truth — real catalogs have genuinely unresolved splits, and a vault that cannot hold one sends the user back to the spreadsheet. Pulled into MVP from the v1 verification layer, so it is the first instance of the vault checking itself; keep the check separate from the storage path so the v1 discrepancy work can reuse it. Distinguish absent from incomplete — no shares recorded is unknown, not wrong. Off the critical path; runs parallel to Tasks 9-11.
+**Done:** [ ]
+
 ## Summary
 
-- **Total tasks:** 12
-- **Total estimated effort:** 46 points
-- **Critical path:** 1 → 3 → 4 → 5 → 6 → 7 → 8 → 10 → 11 → 12 (38 points). Task 2 runs parallel to Tasks 3–6 and must land before Task 7; Task 9 runs parallel to Task 8.
+- **Total tasks:** 13
+- **Total estimated effort:** 52 points
+- **Critical path:** 1 → 3 → 4 → 5 → 6 → 7 → 8 → 10 → 11 → 12 (42 points). Task 2 runs parallel to Tasks 3–6 and must land before Task 7; Task 9 runs parallel to Task 8; Task 13 runs parallel to Tasks 9–11.
 - **Risks:**
   - **Task 2 carries hidden integration work.** shadcn/ui's default token vocabulary conflicts with `saboteur-base.css`, and accepting the defaults silently violates the styles repo's central rule. Budgeted at 5 points on that basis; if the remapping proves deeper it will grow.
-  - **Task 6 carries an unresolved design decision** — the conflict-resolution rule between user-asserted and registry-issued values. Every display surface inherits it, so deciding late means changing several tasks.
+  - **Task 6's conflict-resolution rule is decided** (user-asserted wins as current, registry-issued retained, override marked — FR-30). The residual risk moved to Task 10: the marking must appear on every surface a value renders on, which is a shared-component constraint rather than a per-view one.
   - **Task 11 cannot be validated through normal use** in this feature and depends on fixtures that will outlive it.
   - **Task 3's storage choice is provisional** until Feature 2 publishes the format specification; keep storage isolated or that publication becomes a rewrite.
-  - **Sequential shape.** Ten of twelve tasks sit on the critical path, so this feature parallelises poorly across people — consistent with its size flag in the feature breakdown.
+  - **Share modelling lands ahead of its consumer.** FR-32 and FR-33 are exercised only by fixtures until Feature 4 ships, so a modelling error here surfaces late. The fixtures from Task 11 are the only defence, which raises their value further.
+  - **Sequential shape.** Ten of thirteen tasks sit on the critical path, so this feature parallelises poorly across people — consistent with its size flag in the feature breakdown.
