@@ -6,15 +6,21 @@
 // (marker + version) and lifecycle (create/open/close/persist); the body is
 // an empty placeholder that Task 4 (assertion log) will populate.
 
+import type { Assertion } from './assertion.ts';
+
 export const VAULT_FORMAT_MARKER = 'nayose-vault' as const;
 export const VAULT_FORMAT_VERSION = 1 as const;
 
 /**
- * Placeholder for the vault's actual contents. Task 4 (assertion log) and
- * Task 5 (entity model) will define and populate this; Task 3 only needs a
- * body slot to exist so the envelope round-trips.
+ * The vault's actual contents. Task 3 only needed a body slot to exist so
+ * the envelope round-trips; Task 4 (assertion log) adds the `assertions`
+ * array. `assertions` is optional so a freshly-created empty vault body
+ * (`{}`) remains a valid `VaultBody`. Task 5 (entity model) may extend this
+ * further.
  */
-export type VaultBody = Record<string, never>;
+export type VaultBody = {
+  assertions?: Assertion[];
+};
 
 export interface VaultFile {
   nayoseVault: typeof VAULT_FORMAT_MARKER;
