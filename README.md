@@ -16,16 +16,24 @@ that outlives any platform they use.
 See [`docs/concept.md`](docs/concept.md) for the full problem statement and
 product framing.
 
-## Status: Feature 1 only
+## Status: Features 1 and 2
 
 This repository currently implements **Feature 1 — the vault with a
-hand-entered catalog** (`specs/features/vault-core.md`). Concretely, that
-means:
+hand-entered catalog** (`specs/features/vault-core.md`) and **Feature 2 —
+export and the published on-disk format**
+(`specs/features/export-format.md`). Concretely, that means:
 
 - You can create a vault and populate it by hand: works, recordings,
   releases, parties, shares, and registration state.
 - Every value is stored as an assertion with full provenance, and you can
   correct any value without destroying the assertion it overrides.
+- You can open, create, and close a vault from the app's UI, and export the
+  currently open vault's complete contents to a user-chosen path.
+- The on-disk vault format is a published, versioned specification —
+  [`docs/format/v1.md`](docs/format/v1.md) — with an independent
+  stdlib-only Python 3 reader (`tools/format-reader/read_vault.py`) that
+  proves the spec alone is sufficient to build a conformant reader in a
+  different language.
 - The application runs fully offline; it has no network access anywhere.
 
 What does **not** exist yet:
@@ -33,8 +41,6 @@ What does **not** exist yet:
 - **No import.** Nothing populates the vault except hand entry (and test
   fixtures). Streaming-service import, MLC import, and generic spreadsheet
   import are Features 3, 4, and 5.
-- **No export**, and no published on-disk format guarantee. See
-  [Storage format is provisional](#storage-format-is-provisional) below.
 - **No network access of any kind** — no verification, no sync, no
   telemetry, nothing. Enforced by an automated check (`check:no-network`),
   not just by omission.
@@ -58,7 +64,9 @@ For the product's full scope and the milestones beyond this feature, see
 
 CI pins `node-version: '22'` (`.github/workflows/build.yml`), verified
 green on Node v22.23.2 and v24.15.0 across typecheck, tests, the
-no-network check, and build.
+no-network check, and build. A separate `format-reader` job (`ubuntu-latest`
+only) runs the independent Python reader against a fixture vault to prove
+`docs/format/v1.md` is sufficient on its own.
 
 ```bash
 npm install
@@ -102,14 +110,17 @@ between process types:
 For the assertion log, projection, and conflict-resolution model in detail,
 see [`docs/architecture.md`](docs/architecture.md).
 
-### Storage format is provisional
+### Storage format
 
 The on-disk vault format (a single JSON file — see
-`src/main/vault/vault-file.ts`) is a working implementation detail for this
-feature, not a published contract. **Feature 2 publishes the format
-specification and may force a revision.** Nothing outside
-`src/main/vault/vault-file.ts` and `src/shared/types/vault.ts` should assume
-today's file shape is stable.
+`src/main/vault/vault-file.ts`) is published as a versioned specification at
+[`docs/format/v1.md`](docs/format/v1.md). Per that document's never-overwrite
+policy, `docs/format/v1.md` itself is never edited or deleted once
+published; any future change to the shape ships as a new `docs/format/vN.md`
+file. `tools/format-reader/read_vault.py` is an independent, stdlib-only
+Python 3 reader written against the published spec alone, run in CI against
+`tools/format-reader/fixtures/sample-vault.json` (see the `format-reader`
+job in `.github/workflows/build.yml`).
 
 ## Specs
 
@@ -122,11 +133,17 @@ structure, each rung tracing to the one above it:
    the full MVP/v1/v2 requirement set for Nayose as a product.
 3. **Feature list** — `specs/product/nayose.features.md` — the product spec
    broken into shippable features.
-4. **Feature spec** — [`specs/features/vault-core.md`](specs/features/vault-core.md)
-   — this feature's requirements, traced back to the product spec.
-5. **Tasks** — [`specs/features/vault-core/tasks.md`](specs/features/vault-core/tasks.md)
-   — the feature spec broken into the 14 tasks actually executed on
-   `feat/vault-core`.
+4. **Feature specs** —
+   [`specs/features/vault-core.md`](specs/features/vault-core.md) (Feature 1)
+   and [`specs/features/export-format.md`](specs/features/export-format.md)
+   (Feature 2) — each feature's requirements, traced back to the product
+   spec.
+5. **Tasks** —
+   [`specs/features/vault-core/tasks.md`](specs/features/vault-core/tasks.md)
+   and
+   [`specs/features/export-format/tasks.md`](specs/features/export-format/tasks.md)
+   — each feature spec broken into the tasks actually executed on
+   `feat/vault-core` and `feat/export-format` respectively.
 
 Anything under `specs/` is an approved, authoritative artifact of what was
 agreed to be built — treat it as source of truth over this README if the two

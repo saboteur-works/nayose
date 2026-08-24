@@ -14,7 +14,7 @@
 
 ### Task 1: Vault open/create UI
 **What:** A renderer UI that lets a user create a new vault, open an existing one, and close it, wired to the `vault:create` / `vault:open` / `vault:close` channels already exposed in `src/main/preload.ts`.
-**Files:** `src/renderer/App.tsx`, plus a new view under `src/renderer/views/` following the existing house pattern set by `entity-create.tsx` and `catalog.tsx`.
+**Files:** `src/renderer/App.tsx`, `src/renderer/views/vault-lifecycle.tsx`, `src/renderer/views/vault-lifecycle-logic.ts`, `src/renderer/views/vault-lifecycle-logic.test.ts`
 **Done when:** A user can create a new vault at a chosen path from the interface, close the application, reopen that file from the interface, and observe identical contents; opening a file that is not a vault surfaces the returned error message in the UI rather than failing silently or crashing. The existing `VaultCreateResult` / `VaultOpenResult` canceled-vs-failure distinction is handled — a canceled dialog is not reported as an error.
 **Depends on:** none
 **Estimate:** 3
@@ -23,7 +23,7 @@
 
 ### Task 2: Export serialization boundary
 **What:** A named `exportVault` function in the main process that serializes the current vault envelope to a user-chosen path through the existing JSON write primitive, not a file copy.
-**Files:** `src/main/vault/vault-file.ts`, `src/main/vault/vault-session.ts`
+**Files:** `src/main/vault/vault-file.ts`, `src/main/vault/vault-file.test.ts`, `src/main/vault/vault-session.ts`, `src/main/vault/vault-session.test.ts`, `src/shared/types/vault.ts`
 **Done when:** `vault-file.ts` exposes an `exportVault(path, vault)` (or equivalently named) function that builds the envelope the same way `persistSession`/`writeVaultFile` already do and writes it via `writeVaultFile`; calling it does not invoke `fs.copyFile` anywhere in the implementation (verified by code review and a unit test asserting the module has no `fs.copyFile` import); calling it with no vault open returns a typed error rather than throwing.
 **Depends on:** none
 **Estimate:** 3
@@ -32,7 +32,7 @@
 
 ### Task 3: Export IPC handler and renderer trigger
 **What:** A user-facing "Export Vault" action that lets a musician choose a save location and produces a complete export via Task 2's serialization boundary.
-**Files:** `src/main/ipc/vault-handlers.ts`, `src/renderer/views/vault-export.tsx` (or equivalent renderer trigger)
+**Files:** `src/main/ipc/vault-handlers.ts`, `src/main/ipc/vault-handlers.test.ts`, `src/main/preload.ts`, `src/renderer/views/vault-lifecycle.tsx`, `src/renderer/views/vault-lifecycle-logic.ts`, `src/renderer/views/vault-lifecycle-logic.test.ts`, `src/shared/types/vault.ts`
 **Done when:** A user with an open vault can trigger export from the interface, choose a destination via a save dialog, and the resulting file is written through `exportVault`; the action requires no payment, account, or network access; the exported file, reopened via the existing `vault:open` path, validates successfully and contains the complete vault including full assertion history.
 **Depends on:** 1, 2
 **Estimate:** 3
@@ -77,7 +77,7 @@
 
 ### Task 8: Version-refusal surfacing and coverage
 **What:** Confirm and finish the version-declaration and refusal behaviour FR-5, FR-6, and FR-8 require, surfacing the refusal to the user and proving it with tests.
-**Files:** `src/renderer/views/vault-open.tsx` (or equivalent open-vault error display), `src/main/vault/vault-file.test.ts`
+**Files:** `src/main/vault/vault-file.test.ts`, `src/renderer/views/vault-lifecycle-logic.test.ts`
 **Done when:** A test opens a file whose `formatVersion` does not match `VAULT_FORMAT_VERSION` and asserts `validateVaultEnvelope` returns `reason: 'unsupported-version'` with a message stating the declared version (FR-5, FR-8); the renderer displays that message to the user when `vault:open` returns this failure, rather than swallowing it or showing a generic error; a test or code-level check confirms `VAULT_FORMAT_VERSION` (`src/shared/types/vault.ts`) is not derived from and does not influence the application's `package.json` version, and vice versa (FR-6).
 **Depends on:** 1
 **Estimate:** 3
@@ -105,4 +105,5 @@ Task numbers are stable labels; the dependency graph determines execution order,
   - **Task 5 is the single point of failure for Tasks 6 and 7.** If the specification document has a gap, the correct remedy is to amend `docs/format/v1.md`, not to let Task 6's author consult the TypeScript source — per OQ-3's governing rule, doing so silently would make the reader prove nothing. Budget slack in Task 6 for at least one round-trip back to Task 5.
   - **Task 6 carries most of the feature's estimation uncertainty.** It is the only task in a different language and runtime than the rest of the codebase, and its required depth (reimplementing projection and conflict resolution from documentation alone) is the substantive evidentiary burden of FR-4, not incidental scope. Budgeted at 8 points on that basis.
   - **Task 8's estimate assumes FR-5/FR-8 are already satisfied at the validation layer**, per the feature spec's binding note that `validateVaultEnvelope` already implements exact-match-or-refuse with the declared version in its message. If that assumption is wrong on inspection, this task grows to include fixing `vault-file.ts` itself, not just surfacing and testing it.
+  - **A `Files` field naming a speculative path with an "(or equivalent ...)" hedge defeats the orchestrator's conflict detection.** During this feature's own execution, Task 3 and Task 8 each named a placeholder renderer file with an "or equivalent" hedge instead of a real path; both hedges independently resolved to the same actual file, so the two tasks appeared disjoint to `file_conflicts` detection and two implementors appended to it in parallel, halting Wave 2 on a cherry-pick conflict. Future task lists should name only files that exist or that the task itself is expected to create, never a guessed-at-or-equivalent placeholder.
   - **No CONTRIBUTING.md exists yet.** Task 5's never-overwrite policy currently lives only in `docs/format/v1.md`'s preamble; if a CONTRIBUTING.md is added later, the policy should be mirrored there per OQ-5's resolution, but that is out of this feature's scope until such a file exists.

@@ -1,9 +1,11 @@
 # Architecture: the vault
 
 This document covers the data model implemented by Feature 1
-(`feat/vault-core`, spec at `specs/features/vault-core.md`). It is for a
-developer working in `src/main/vault/`, `src/main/ipc/`, or the renderer
-surfaces that consume them.
+(`feat/vault-core`, spec at `specs/features/vault-core.md`), plus the
+on-disk storage format that Feature 2 (`feat/export-format`, spec at
+`specs/features/export-format.md`) published. It is for a developer working
+in `src/main/vault/`, `src/main/ipc/`, or the renderer surfaces that consume
+them.
 
 ## The assertion log is append-only
 
@@ -93,14 +95,23 @@ over-allocation reported). This check is read-only and never blocks or
 refuses a write: real catalogs frequently have splits that do not sum to
 100%, and the vault's job is to make that visible, not to enforce it.
 
-## Storage format is provisional
+## Storage format is published
 
-The vault is currently a single JSON file (`src/main/vault/vault-file.ts`),
-identified by a marker field and a format-version field, validated on read.
-This is a working implementation choice for Feature 1, not a published
-contract — Feature 2 is where the on-disk format becomes a documented,
-versioned deliverable (`specs/product/nayose.md` FR-20 through FR-29), and
-that work may force a revision of today's shape. The boundary is kept
-narrow deliberately: only `vault-file.ts` and `src/shared/types/vault.ts`
-know the current on-disk shape, so that a future format change does not
-ripple through the entity model, the projection layer, or the renderer.
+The vault is a single JSON file (`src/main/vault/vault-file.ts`), identified
+by a marker field and a format-version field, validated on read. Feature 2
+(`specs/product/nayose.md` FR-20 through FR-29) published this shape as a
+versioned, documented deliverable at
+[`docs/format/v1.md`](format/v1.md). Once published, a `docs/format/vN.md`
+file is never edited or deleted — a future format change ships as a new
+version file rather than a revision of this one.
+
+Knowledge of the current on-disk envelope shape (the marker, version, and
+body fields) is confined to two files: `src/shared/types/vault.ts` defines
+the types, and `src/main/vault/vault-file.ts` is the only place the
+envelope literal is constructed or validated — including via its exported
+`buildVaultEnvelope(assertions)`, the single named boundary every caller
+that needs a `VaultFile` envelope goes through (session persistence,
+session export, direct export) rather than assembling the shape itself.
+`src/main/vault/vault-session.ts` calls `buildVaultEnvelope` but has no
+knowledge of the marker or version fields. A future format change cannot
+ripple into the entity model, the projection layer, or the renderer.

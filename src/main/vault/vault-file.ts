@@ -28,6 +28,21 @@ export async function writeVaultFile(filePath: string, vault: VaultFile): Promis
   await fs.writeFile(filePath, contents, 'utf-8');
 }
 
+/**
+ * Build a vault envelope (marker + version + body) from a set of assertions.
+ * This is the single, named serialization boundary for the on-disk shape:
+ * every caller that needs a `VaultFile` envelope around an assertion log
+ * (session persistence, session export, direct export) goes through this
+ * function rather than constructing the envelope literal itself.
+ */
+export function buildVaultEnvelope(assertions: VaultFile['body']['assertions']): VaultFile {
+  return {
+    nayoseVault: VAULT_FORMAT_MARKER,
+    formatVersion: VAULT_FORMAT_VERSION,
+    body: { assertions: assertions ?? [] },
+  };
+}
+
 /** Create a brand-new vault file at the given path and return the envelope written. */
 export async function createVaultFile(filePath: string): Promise<VaultFile> {
   const vault = createEmptyVault();
@@ -37,8 +52,8 @@ export async function createVaultFile(filePath: string): Promise<VaultFile> {
 
 /**
  * Export a vault to a user-chosen path by rebuilding its on-disk envelope
- * (marker + version + body) exactly the way `persistSession` and
- * `createVaultFile` already do, then writing it through `writeVaultFile`.
+ * (marker + version + body) via `buildVaultEnvelope`, then writing it
+ * through `writeVaultFile`.
  *
  * This is deliberately NOT a raw file duplication: it never reads or copies
  * bytes from an existing file on disk. All knowledge of the on-disk shape
@@ -47,11 +62,7 @@ export async function createVaultFile(filePath: string): Promise<VaultFile> {
  * signature without changing callers.
  */
 export async function exportVault(filePath: string, vault: VaultFile): Promise<void> {
-  const envelope: VaultFile = {
-    nayoseVault: VAULT_FORMAT_MARKER,
-    formatVersion: VAULT_FORMAT_VERSION,
-    body: { assertions: vault.body.assertions ?? [] },
-  };
+  const envelope = buildVaultEnvelope(vault.body.assertions);
   await writeVaultFile(filePath, envelope);
 }
 

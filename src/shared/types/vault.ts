@@ -1,10 +1,15 @@
 // On-disk shape of a Nayose vault file, plus the IPC result/error types the
 // main process returns to the renderer for vault lifecycle operations.
 //
-// This format is PROVISIONAL: a later feature will publish a formal storage
-// format spec and may force revision. This task only owns the envelope
-// (marker + version) and lifecycle (create/open/close/persist); the body is
-// an empty placeholder that Task 4 (assertion log) will populate.
+// This format is PUBLISHED: Feature 2 (`feat/export-format`) documents it as
+// a versioned specification at `docs/format/v1.md`. Per that document's
+// never-overwrite policy, `docs/format/v1.md` itself is never edited or
+// deleted once published — a future format change ships as a new
+// `docs/format/vN.md` file, and the types below would gain a corresponding
+// version bump rather than a silent revision. This task originally only
+// owned the envelope (marker + version) and lifecycle
+// (create/open/close/persist); the body has since been populated by the
+// assertion log (Task 4) and extended by export (Feature 2 Task 2).
 
 import type { Assertion } from './assertion.ts';
 

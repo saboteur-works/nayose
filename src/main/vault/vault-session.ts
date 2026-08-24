@@ -20,14 +20,9 @@
 
 import { loadAssertionLog, type AssertionLog } from './assertion-log.ts';
 import { createAccount, getEntityKind } from './entities.ts';
-import { exportVault as exportVaultFile, writeVaultFile } from './vault-file.ts';
+import { buildVaultEnvelope, exportVault as exportVaultFile, writeVaultFile } from './vault-file.ts';
 import type { AccountId } from '../../shared/types/entities.ts';
-import {
-  VAULT_FORMAT_MARKER,
-  VAULT_FORMAT_VERSION,
-  type VaultExportResult,
-  type VaultFile,
-} from '../../shared/types/vault.ts';
+import type { VaultExportResult, VaultFile } from '../../shared/types/vault.ts';
 
 export interface VaultSession {
   path: string;
@@ -58,11 +53,7 @@ export function clearSession(): void {
  * current contents.
  */
 export async function persistSession(activeSession: VaultSession): Promise<void> {
-  const vault: VaultFile = {
-    nayoseVault: VAULT_FORMAT_MARKER,
-    formatVersion: VAULT_FORMAT_VERSION,
-    body: { assertions: activeSession.log.assertions },
-  };
+  const vault = buildVaultEnvelope(activeSession.log.assertions);
   await writeVaultFile(activeSession.path, vault);
 }
 
@@ -83,11 +74,7 @@ export async function exportSession(exportPath: string): Promise<VaultExportResu
     };
   }
 
-  const vault: VaultFile = {
-    nayoseVault: VAULT_FORMAT_MARKER,
-    formatVersion: VAULT_FORMAT_VERSION,
-    body: { assertions: session.log.assertions },
-  };
+  const vault = buildVaultEnvelope(session.log.assertions);
   await exportVaultFile(exportPath, vault);
   return { ok: true };
 }
