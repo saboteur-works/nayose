@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { ContradictionWarningDialog, useContradictionGuard } from './contradiction-warning';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 
@@ -24,6 +25,13 @@ import { Input } from './ui/input';
  * serialize/deserialize between the field's real type and the text the
  * user edits; both default to identity string pass-through for plain
  * string fields (the common case, e.g. a Work's title).
+ *
+ * Task 12 addition: submitting is guarded by
+ * `useContradictionGuard`/`ContradictionWarningDialog`
+ * (./contradiction-warning.tsx) — if the field's CURRENT value is
+ * registry-issued, a warning naming the issuing source is shown BEFORE
+ * `entity:editField` is called, and the user must confirm or cancel;
+ * cancelling never calls `entity:editField`.
  */
 export interface FieldEditorProps<TValue = unknown> {
   entityId: string;
@@ -57,24 +65,40 @@ export function FieldEditor<TValue = unknown>({
   const [draft, setDraft] = useState<string>(format(currentValue));
   const [status, setStatus] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Task 12: guards the actual write below a warning when the field's
+  // CURRENT value is registry-issued (see contradiction-warning.tsx).
+  const { pendingSource, guard, confirm, cancel } = useContradictionGuard();
 
   const inputId = `field-editor-${entityId}-${fieldName}`;
+
+  const performEdit = async (): Promise<void> => {
+    const result = await window.nayose.entities.editField({
+      entityId,
+      fieldName,
+      value: parse(draft),
+    });
+    if (result.ok) {
+      setStatus('Saved');
+      onSaved?.(result.id);
+    } else {
+      setStatus(`Error: ${result.error.message}`);
+    }
+  };
 
   const handleSubmit = async (): Promise<void> => {
     setIsSubmitting(true);
     setStatus('');
     try {
-      const result = await window.nayose.entities.editField({
-        entityId,
-        fieldName,
-        value: parse(draft),
-      });
-      if (result.ok) {
-        setStatus('Saved');
-        onSaved?.(result.id);
-      } else {
-        setStatus(`Error: ${result.error.message}`);
-      }
+      await guard(entityId, fieldName, performEdit);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleConfirm = async (): Promise<void> => {
+    setIsSubmitting(true);
+    try {
+      await confirm();
     } finally {
       setIsSubmitting(false);
     }
@@ -100,6 +124,13 @@ export function FieldEditor<TValue = unknown>({
         <p className="text-sm text-fg-tertiary" data-testid="field-editor-status">
           {status}
         </p>
+      ) : null}
+      {pendingSource ? (
+        <ContradictionWarningDialog
+          source={pendingSource}
+          onConfirm={() => void handleConfirm()}
+          onCancel={cancel}
+        />
       ) : null}
     </form>
   );

@@ -14,7 +14,7 @@
     "start": "npm run build && electron .",
     "dist": "npm run build && electron-builder",
     "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
-    "test": "node --test src/**/*.test.ts"
+    "test": "node --test src/**/*.test.ts test/**/*.test.ts"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
