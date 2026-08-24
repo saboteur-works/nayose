@@ -14,7 +14,8 @@
     "start": "npm run build && electron .",
     "dist": "npm run build && electron-builder",
     "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
-    "test": "node --test src/**/*.test.ts test/**/*.test.ts"
+    "test": "node --test src/**/*.test.ts test/**/*.test.ts test/**/*.spec.ts",
+    "check:no-network": "node scripts/check-no-network.ts"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
