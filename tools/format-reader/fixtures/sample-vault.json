@@ -1,0 +1,98 @@
+{
+  "nayoseVault": "nayose-vault",
+  "formatVersion": 1,
+  "body": {
+    "assertions": [
+      {
+        "id": "1",
+        "entityId": "p-1",
+        "fieldName": "$type",
+        "value": "Party",
+        "actor": "user:jane",
+        "timestamp": "2026-01-05T09:00:00.000Z",
+        "source": "manual-entry",
+        "sourceClass": "user-asserted"
+      },
+      {
+        "id": "2",
+        "entityId": "p-1",
+        "fieldName": "displayName",
+        "value": "Jane Songwriter",
+        "actor": "user:jane",
+        "timestamp": "2026-01-05T09:00:01.000Z",
+        "source": "manual-entry",
+        "sourceClass": "user-asserted"
+      },
+      {
+        "id": "3",
+        "entityId": "p-2",
+        "fieldName": "$type",
+        "value": "Party",
+        "actor": "user:jane",
+        "timestamp": "2026-01-05T09:01:00.000Z",
+        "source": "manual-entry",
+        "sourceClass": "user-asserted"
+      },
+      {
+        "id": "4",
+        "entityId": "p-2",
+        "fieldName": "displayName",
+        "value": "Sam Composer",
+        "actor": "user:jane",
+        "timestamp": "2026-01-05T09:01:01.000Z",
+        "source": "manual-entry",
+        "sourceClass": "user-asserted"
+      },
+      {
+        "id": "5",
+        "entityId": "w-1",
+        "fieldName": "$type",
+        "value": "Work",
+        "actor": "user:jane",
+        "timestamp": "2026-01-05T09:02:00.000Z",
+        "source": "manual-entry",
+        "sourceClass": "user-asserted"
+      },
+      {
+        "id": "6",
+        "entityId": "w-1",
+        "fieldName": "title",
+        "value": "Sunrise Song (Registry Title)",
+        "actor": "system:ascap-import",
+        "timestamp": "2026-01-06T12:00:00.000Z",
+        "source": "ascap",
+        "sourceClass": "registry-issued"
+      },
+      {
+        "id": "7",
+        "entityId": "w-1",
+        "fieldName": "title",
+        "value": "Sunrise Song",
+        "actor": "user:jane",
+        "timestamp": "2026-01-07T15:30:00.000Z",
+        "source": "manual-entry",
+        "sourceClass": "user-asserted"
+      },
+      {
+        "id": "8",
+        "entityId": "w-1",
+        "fieldName": "share:p-1",
+        "value": { "numerator": 1, "denominator": 3 },
+        "actor": "user:jane",
+        "timestamp": "2026-01-07T15:31:00.000Z",
+        "source": "manual-entry",
+        "sourceClass": "user-asserted"
+      },
+      {
+        "id": "9",
+        "entityId": "w-1",
+        "fieldName": "share:p-2",
+        "value": { "numerator": 2, "denominator": 3 },
+        "actor": "user:jane",
+        "timestamp": "2026-01-07T15:31:30.000Z",
+        "source": "manual-entry",
+        "sourceClass": "user-asserted"
+      }
+    ]
+  }
+}
