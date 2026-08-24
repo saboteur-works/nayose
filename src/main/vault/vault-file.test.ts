@@ -126,7 +126,7 @@ test('opening unrelated JSON returns a typed not-a-vault error', async () => {
   });
 });
 
-test('opening a vault with an unsupported format version returns a typed error', async () => {
+test('opening a vault with an unsupported format version returns a typed error stating the declared version (FR-5, FR-8)', async () => {
   await withTempDir(async (dir) => {
     const filePath = path.join(dir, 'future.nayose');
     await writeFile(
@@ -140,8 +140,39 @@ test('opening a vault with an unsupported format version returns a typed error',
     assert.equal(result.ok, false);
     if (!result.ok) {
       assert.equal(result.error.reason, 'unsupported-version');
+      // FR-8: the message must state the declared version, not just refuse silently.
+      assert.match(result.error.message, /999/);
+      assert.equal(
+        result.error.message,
+        `File declares vault format version 999, but this app supports version ${VAULT_FORMAT_VERSION}.`,
+      );
     }
   });
+});
+
+// FR-6: VAULT_FORMAT_VERSION must be an independent, hardcoded literal, not
+// derived from (or derivable into) package.json's application version.
+test('VAULT_FORMAT_VERSION is independent of package.json version (FR-6)', async () => {
+  const vaultTypesPath = fileURLToPath(
+    new URL('../../shared/types/vault.ts', import.meta.url),
+  );
+  const vaultTypesSource = await readFile(vaultTypesPath, 'utf-8');
+
+  // The module that owns VAULT_FORMAT_VERSION must not reference
+  // package.json in any way -- no read, no import, no require.
+  assert.doesNotMatch(vaultTypesSource, /package\.json/);
+
+  // VAULT_FORMAT_VERSION must be declared as a hardcoded numeric literal in
+  // that source text, not computed from another value.
+  assert.match(vaultTypesSource, /export const VAULT_FORMAT_VERSION = 1 as const;/);
+  assert.equal(VAULT_FORMAT_VERSION, 1);
+
+  // Read package.json's version directly, without going through any module
+  // that also knows about VAULT_FORMAT_VERSION, to confirm the two values
+  // live in entirely separate, unconnected places.
+  const packageJsonPath = fileURLToPath(new URL('../../../package.json', import.meta.url));
+  const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8')) as { version: unknown };
+  assert.equal(typeof packageJson.version, 'string');
 });
 
 test('validateVaultEnvelope rejects non-object values without throwing', () => {

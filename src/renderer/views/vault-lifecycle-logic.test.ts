@@ -95,3 +95,24 @@ test('resolveExportStatus: failure surfaces the returned error message (e.g. no-
   assert.equal(status.isError, true);
   assert.equal(status.message, 'Cannot export: no vault is currently open.');
 });
+
+// Feature 2, Task 8 (FR-5, FR-8): an unsupported-version refusal is a
+// failure like any other, and resolveOpenStatus's generic failure branch
+// must surface its exact message -- including the declared version -- to
+// the user rather than a generic placeholder like "an error occurred".
+test('resolveOpenStatus: surfaces the unsupported-version message verbatim, including the declared version', () => {
+  const result: VaultOpenResult = {
+    ok: false,
+    canceled: false,
+    error: {
+      reason: 'unsupported-version',
+      message: 'File declares vault format version 2, but this app supports version 1.',
+    },
+  };
+  const status = resolveOpenStatus(result);
+  assert.equal(status.isError, true);
+  assert.equal(
+    status.message,
+    'File declares vault format version 2, but this app supports version 1.',
+  );
+});
