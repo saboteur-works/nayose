@@ -1,5 +1,10 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { VaultCloseResult, VaultCreateResult, VaultOpenResult } from '../shared/types/vault.ts';
+import type {
+  VaultCloseResult,
+  VaultCreateResult,
+  VaultExportTriggerResult,
+  VaultOpenResult,
+} from '../shared/types/vault.ts';
 // Types come from shared/types/entity-ipc.ts (not ./ipc/entity-handlers.ts):
 // entity-handlers.ts has VALUE imports of main-only modules using relative
 // `.ts` extensions (for Node's native TS resolution, see
@@ -47,6 +52,9 @@ const nayoseApi = {
     create: (): Promise<VaultCreateResult> => ipcRenderer.invoke('vault:create'),
     open: (): Promise<VaultOpenResult> => ipcRenderer.invoke('vault:open'),
     close: (): Promise<VaultCloseResult> => ipcRenderer.invoke('vault:close'),
+    // Feature 2 Task 3 addition: trigger a save dialog and export the
+    // currently open vault's complete contents to the chosen path.
+    export: (): Promise<VaultExportTriggerResult> => ipcRenderer.invoke('vault:export'),
   },
   // Task 8 addition: manual entity-creation channels, operating on the
   // currently-open vault (see ../main/vault/vault-session.ts).

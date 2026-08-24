@@ -2,17 +2,26 @@ import { useState } from 'react';
 
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { resolveCreateStatus, resolveOpenStatus, type VaultStatus } from './vault-lifecycle-logic';
+import {
+  resolveCreateStatus,
+  resolveExportStatus,
+  resolveOpenStatus,
+  type VaultStatus,
+} from './vault-lifecycle-logic';
 
 const NO_STATUS: VaultStatus = { message: '', isError: false };
 
 /**
- * Vault open/create/close view (Feature 2, Task 1): the renderer surface for
- * `window.nayose.vault.create/open/close`, which were already implemented
- * and wired by Feature 1 (see ../../main/ipc/vault-handlers.ts). This view
- * owns no vault state of its own beyond "which path (if any) is currently
- * open" for display — the actual in-memory session lives in the main
- * process (../../main/vault/vault-session.ts).
+ * Vault open/create/close/export view (Feature 2, Tasks 1 and 3): the
+ * renderer surface for `window.nayose.vault.create/open/close/export`.
+ * Create/open/close were already implemented and wired by Feature 1 (see
+ * ../../main/ipc/vault-handlers.ts); export is Feature 2 Task 3's addition,
+ * added here rather than a separate `vault-export.tsx` since it shares the
+ * same "which path is currently open" state this view already owns and
+ * naturally belongs beside the other vault lifecycle actions. This view
+ * owns no vault state of its own beyond that path for display — the actual
+ * in-memory session lives in the main process
+ * (../../main/vault/vault-session.ts).
  */
 export function VaultLifecycleView(): JSX.Element {
   const [openPath, setOpenPath] = useState<string | undefined>(undefined);
@@ -56,6 +65,16 @@ export function VaultLifecycleView(): JSX.Element {
     }
   };
 
+  const handleExport = async (): Promise<void> => {
+    setIsBusy(true);
+    try {
+      const result = await window.nayose.vault.export();
+      setStatus(resolveExportStatus(result));
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
   return (
     <Card data-testid="vault-lifecycle-view">
       <CardHeader>
@@ -76,6 +95,14 @@ export function VaultLifecycleView(): JSX.Element {
             disabled={isBusy || !openPath}
           >
             Close vault
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void handleExport()}
+            disabled={isBusy || !openPath}
+          >
+            Export vault…
           </Button>
         </div>
 

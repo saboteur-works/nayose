@@ -5,9 +5,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { resolveCreateStatus, resolveOpenStatus } from './vault-lifecycle-logic.ts';
+import { resolveCreateStatus, resolveExportStatus, resolveOpenStatus } from './vault-lifecycle-logic.ts';
 import { VAULT_FORMAT_MARKER, VAULT_FORMAT_VERSION } from '../../shared/types/vault.ts';
-import type { VaultCreateResult, VaultFile, VaultOpenResult } from '../../shared/types/vault.ts';
+import type {
+  VaultCreateResult,
+  VaultExportTriggerResult,
+  VaultFile,
+  VaultOpenResult,
+} from '../../shared/types/vault.ts';
 
 function emptyVault(): VaultFile {
   return { nayoseVault: VAULT_FORMAT_MARKER, formatVersion: VAULT_FORMAT_VERSION, body: {} };
@@ -64,4 +69,29 @@ test('resolveOpenStatus: failure surfaces the returned error message (e.g. not-a
   const status = resolveOpenStatus(result);
   assert.equal(status.isError, true);
   assert.equal(status.message, 'This file is not a Nayose vault');
+});
+
+test('resolveExportStatus: success reports the exported path, not an error', () => {
+  const result: VaultExportTriggerResult = { ok: true, path: '/tmp/exported.nayose' };
+  const status = resolveExportStatus(result);
+  assert.equal(status.isError, false);
+  assert.match(status.message, /\/tmp\/exported\.nayose/);
+});
+
+test('resolveExportStatus: canceled produces no message at all', () => {
+  const result: VaultExportTriggerResult = { ok: false, canceled: true };
+  const status = resolveExportStatus(result);
+  assert.equal(status.message, '');
+  assert.equal(status.isError, false);
+});
+
+test('resolveExportStatus: failure surfaces the returned error message (e.g. no-vault-open)', () => {
+  const result: VaultExportTriggerResult = {
+    ok: false,
+    canceled: false,
+    error: { reason: 'no-vault-open', message: 'Cannot export: no vault is currently open.' },
+  };
+  const status = resolveExportStatus(result);
+  assert.equal(status.isError, true);
+  assert.equal(status.message, 'Cannot export: no vault is currently open.');
 });

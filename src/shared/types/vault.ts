@@ -100,3 +100,31 @@ export interface VaultExportFailure {
  * which operates on a caller-supplied envelope directly.
  */
 export type VaultExportResult = VaultExportSuccess | VaultExportFailure;
+
+export interface VaultExportTriggerSuccess {
+  ok: true;
+  path: string;
+}
+
+export interface VaultExportTriggerCanceled {
+  ok: false;
+  canceled: true;
+}
+
+export interface VaultExportTriggerFailure {
+  ok: false;
+  canceled: false;
+  error: VaultOpenError;
+}
+
+/**
+ * Result of the renderer-facing `vault:export` IPC channel: wraps
+ * `VaultExportResult` (Task 2) with the canceled-dialog case, following the
+ * same three-shape union as `VaultCreateResult`/`VaultOpenResult`.
+ * `VaultExportResult` itself has no canceled case since it assumes a
+ * destination path was already chosen.
+ */
+export type VaultExportTriggerResult =
+  | VaultExportTriggerSuccess
+  | VaultExportTriggerCanceled
+  | VaultExportTriggerFailure;

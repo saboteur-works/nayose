@@ -9,7 +9,7 @@
 // to the user as an error — only the failure case
 // (`{ ok: false, canceled: false, error }`) should surface a message.
 
-import type { VaultCreateResult, VaultOpenResult } from '../../shared/types/vault.ts';
+import type { VaultCreateResult, VaultExportTriggerResult, VaultOpenResult } from '../../shared/types/vault.ts';
 
 export interface VaultStatus {
   /** User-facing message, or empty string if there is nothing to show. */
@@ -41,6 +41,21 @@ export function resolveCreateStatus(result: VaultCreateResult): VaultStatus {
 export function resolveOpenStatus(result: VaultOpenResult): VaultStatus {
   if (result.ok) {
     return { message: `Opened vault at ${result.path}`, isError: false };
+  }
+  if (result.canceled) {
+    return NO_STATUS;
+  }
+  return { message: result.error.message, isError: true };
+}
+
+/**
+ * Resolves a `VaultExportTriggerResult` into a status to display (Task 3 of
+ * Feature 2 / export-format). Same canceled-vs-failure distinction as
+ * `resolveCreateStatus`/`resolveOpenStatus`.
+ */
+export function resolveExportStatus(result: VaultExportTriggerResult): VaultStatus {
+  if (result.ok) {
+    return { message: `Exported vault to ${result.path}`, isError: false };
   }
   if (result.canceled) {
     return NO_STATUS;
