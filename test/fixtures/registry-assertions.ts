@@ -37,9 +37,9 @@ import {
   type Share,
   type WorkId,
 } from '../../src/shared/types/entities.ts';
-import type { NewAssertion, SourceClass } from '../../src/shared/types/assertion.ts';
+import type {NewAssertion} from '../../src/shared/types/assertion.ts';
 
-const REGISTRY_SOURCE_CLASS: SourceClass = 'registry-issued';
+const REGISTRY_SOURCE_CLASS = 'registry-issued' as const;
 const DEFAULT_TIMESTAMP = '2026-01-01T00:00:00.000Z';
 const IMPORT_ACTOR = 'registry-import';
 

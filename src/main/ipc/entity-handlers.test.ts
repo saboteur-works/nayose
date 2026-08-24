@@ -15,6 +15,7 @@ import path from 'node:path';
 
 import { createVaultFile, readVaultFile } from '../vault/vault-file.ts';
 import { loadAssertionLog } from '../vault/assertion-log.ts';
+import type { Assertion } from '../../shared/types/assertion.ts';
 import { createParty, createRecording, createRelease, createWork, getEntityKind, getMostRecentFieldValue } from '../vault/entities.ts';
 import {
   clearSession,
@@ -105,7 +106,9 @@ test('creating a Party, Work, Recording, and Release each records user-asserted 
 
     const createdIds = [partyId, workId, recordingId, releaseId];
     for (const entityId of createdIds) {
-      const assertionsForEntity = session.log.assertions.filter((a) => a.entityId === entityId);
+      const assertionsForEntity: Assertion[] = session.log.assertions.filter(
+        (a: Assertion) => a.entityId === entityId,
+      );
       assert.ok(assertionsForEntity.length > 0);
       for (const assertion of assertionsForEntity) {
         assert.equal(assertion.sourceClass, 'user-asserted');

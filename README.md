@@ -56,9 +56,9 @@ For the product's full scope and the milestones beyond this feature, see
   against Node v20.20.2). Verified working on Node 24.
 - npm.
 
-> **Known defect:** `.github/workflows/build.yml` currently pins
-> `node-version: '20'`, so CI's `npm test` step exits 1 before the build
-> step is reached. Bumping the pinned version to 22 or later is the fix.
+CI pins `node-version: '22'` (`.github/workflows/build.yml`), verified
+green on Node v22.23.2 and v24.15.0 across typecheck, tests, the
+no-network check, and build.
 
 ```bash
 npm install

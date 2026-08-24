@@ -1,4 +1,5 @@
 {
+  "//": "Base options shared by tsconfig.main.json and tsconfig.renderer.json, which are what the build and `npm run typecheck` actually invoke. The include/jsx/types below exist so an editor's tsserver — which falls back to this file — resolves the whole tree instead of reporting spurious missing-module and missing-type errors. Nothing emits from this config.",
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
@@ -12,6 +13,11 @@
     "isolatedModules": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
-  }
+    "noFallthroughCasesInSwitch": true,
+    "jsx": "react-jsx",
+    "types": ["node", "vite/client"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "scripts/**/*.ts"]
 }
