@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { EntityCreateView } from './views/entity-create';
 // Task 9 addition: catalog browse/navigation view.
 import { CatalogView } from './views/catalog';
+// Feature 2 Task 1 addition: vault open/create/close view.
+import { VaultLifecycleView } from './views/vault-lifecycle';
 
 export function App(): JSX.Element {
   const [pingResult, setPingResult] = useState<string>('');
@@ -19,6 +21,7 @@ export function App(): JSX.Element {
       </button>
       <p data-testid="ping-result">{pingResult}</p>
 
+      <VaultLifecycleView />
       <EntityCreateView />
       <CatalogView />
     </div>
