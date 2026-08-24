@@ -42,7 +42,7 @@ import {
   getWorkDetail,
 } from '../src/main/vault/catalog-queries.ts';
 import { getFieldProvenance } from '../src/main/vault/provenance-queries.ts';
-import { clearSession, ensureAccount, openSession, persistSession } from '../src/main/vault/vault-session.ts';
+import { clearSession, ensureAccount, exportSession, openSession, persistSession } from '../src/main/vault/vault-session.ts';
 import { shouldWarnFromProvenance } from '../src/renderer/components/contradiction-warning-logic.ts';
 import { FIELD_TITLE } from '../src/shared/types/entities.ts';
 
@@ -238,6 +238,44 @@ test('vault-core functionality (Tasks 3-12) works end-to-end with the network st
       // Confirm the reopened log's field values survived the round trip.
       const reopenedReleaseTitle = getMostRecentFieldValue<string>(reopenedLog, releaseId, FIELD_TITLE);
       assert.equal(reopenedReleaseTitle, 'Live Sessions (User Edit)');
+    });
+  });
+});
+
+test('export (feature-2 Task 3) works offline: exportSession succeeds and writes a valid, reopenable vault', async () => {
+  await withNetworkDisabled(async () => {
+    await withTempDir(async (dir) => {
+      const sourcePath = path.join(dir, 'source.nayose');
+      const exportPath = path.join(dir, 'exported.nayose');
+
+      // Set up an open session with some real content to export, the same
+      // way the big end-to-end test above does.
+      const created = await createVaultFile(sourcePath);
+      const session = openSession(sourcePath, created);
+      const accountId = ensureAccount(session.log);
+
+      const workId = createWork(session.log, {
+        title: 'Export Offline Test Work',
+        actor: accountId,
+        timestamp: new Date().toISOString(),
+        source: 'nayose-app',
+        sourceClass: 'user-asserted',
+      });
+
+      // done_when clause 1: exportSession succeeds (does not throw, returns
+      // an ok result) with networking disabled.
+      const exportResult = await exportSession(exportPath);
+      assert.equal(exportResult.ok, true);
+
+      // done_when clause 2: the exported file exists on disk at the target
+      // path and is a valid, readable vault containing the expected content.
+      const reopened = await readVaultFile(exportPath);
+      assert.ok(reopened.ok);
+      if (!reopened.ok) {
+        return;
+      }
+      const reopenedLog = loadAssertionLog(reopened.vault.body.assertions ?? []);
+      assert.equal(getMostRecentFieldValue<string>(reopenedLog, workId, FIELD_TITLE), 'Export Offline Test Work');
     });
   });
 });
