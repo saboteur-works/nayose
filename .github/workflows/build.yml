@@ -55,3 +55,18 @@ jobs:
             release/*.AppImage
             release/*.zip
           if-no-files-found: error
+
+  format-reader:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run independent format reader against fixture vault
+        run: python3 tools/format-reader/read_vault.py tools/format-reader/fixtures/sample-vault.json
