@@ -20,9 +20,14 @@
 
 import { loadAssertionLog, type AssertionLog } from './assertion-log.ts';
 import { createAccount, getEntityKind } from './entities.ts';
-import { writeVaultFile } from './vault-file.ts';
+import { exportVault as exportVaultFile, writeVaultFile } from './vault-file.ts';
 import type { AccountId } from '../../shared/types/entities.ts';
-import { VAULT_FORMAT_MARKER, VAULT_FORMAT_VERSION, type VaultFile } from '../../shared/types/vault.ts';
+import {
+  VAULT_FORMAT_MARKER,
+  VAULT_FORMAT_VERSION,
+  type VaultExportResult,
+  type VaultFile,
+} from '../../shared/types/vault.ts';
 
 export interface VaultSession {
   path: string;
@@ -59,6 +64,32 @@ export async function persistSession(activeSession: VaultSession): Promise<void>
     body: { assertions: activeSession.log.assertions },
   };
   await writeVaultFile(activeSession.path, vault);
+}
+
+/**
+ * Export the currently open session's vault to a user-chosen path, via
+ * vault-file.ts's `exportVault` (which builds the envelope and writes it
+ * through `writeVaultFile` — never a file copy). Returns a typed
+ * `no-vault-open` error rather than throwing when no vault is open.
+ */
+export async function exportSession(exportPath: string): Promise<VaultExportResult> {
+  if (!session) {
+    return {
+      ok: false,
+      error: {
+        reason: 'no-vault-open',
+        message: 'Cannot export: no vault is currently open.',
+      },
+    };
+  }
+
+  const vault: VaultFile = {
+    nayoseVault: VAULT_FORMAT_MARKER,
+    formatVersion: VAULT_FORMAT_VERSION,
+    body: { assertions: session.log.assertions },
+  };
+  await exportVaultFile(exportPath, vault);
+  return { ok: true };
 }
 
 /**

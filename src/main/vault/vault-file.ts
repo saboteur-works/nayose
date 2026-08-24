@@ -36,6 +36,26 @@ export async function createVaultFile(filePath: string): Promise<VaultFile> {
 }
 
 /**
+ * Export a vault to a user-chosen path by rebuilding its on-disk envelope
+ * (marker + version + body) exactly the way `persistSession` and
+ * `createVaultFile` already do, then writing it through `writeVaultFile`.
+ *
+ * This is deliberately NOT a raw file duplication: it never reads or copies
+ * bytes from an existing file on disk. All knowledge of the on-disk shape
+ * stays confined to this module and shared/types/vault.ts, so a future
+ * derived export format can be introduced behind this same function
+ * signature without changing callers.
+ */
+export async function exportVault(filePath: string, vault: VaultFile): Promise<void> {
+  const envelope: VaultFile = {
+    nayoseVault: VAULT_FORMAT_MARKER,
+    formatVersion: VAULT_FORMAT_VERSION,
+    body: { assertions: vault.body.assertions ?? [] },
+  };
+  await writeVaultFile(filePath, envelope);
+}
+
+/**
  * Validate that a parsed JSON value is a recognizable Nayose vault envelope.
  * Returns a typed error rather than throwing, so callers can surface a clear
  * message instead of crashing on malformed or unrelated files.

@@ -34,7 +34,8 @@ export type VaultOpenErrorReason =
   | 'write-error'
   | 'invalid-json'
   | 'not-a-vault'
-  | 'unsupported-version';
+  | 'unsupported-version'
+  | 'no-vault-open';
 
 export interface VaultOpenError {
   reason: VaultOpenErrorReason;
@@ -82,3 +83,20 @@ export type VaultOpenResult = VaultOpenSuccess | VaultOpenCanceled | VaultOpenFa
 export interface VaultCloseResult {
   ok: true;
 }
+
+export interface VaultExportSuccess {
+  ok: true;
+}
+
+export interface VaultExportFailure {
+  ok: false;
+  error: VaultOpenError;
+}
+
+/**
+ * Result of exporting the currently open vault to a user-chosen path.
+ * `no-vault-open` (see `VaultOpenErrorReason`) is the distinguishing failure
+ * mode here: exporting requires an in-memory session, unlike `writeVaultFile`
+ * which operates on a caller-supplied envelope directly.
+ */
+export type VaultExportResult = VaultExportSuccess | VaultExportFailure;

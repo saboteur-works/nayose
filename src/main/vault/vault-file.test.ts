@@ -10,16 +10,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 import {
   createEmptyVault,
   createVaultFile,
+  exportVault,
   readVaultFile,
   validateVaultEnvelope,
   writeVaultFile,
 } from './vault-file.ts';
-import { VAULT_FORMAT_MARKER, VAULT_FORMAT_VERSION } from '../../shared/types/vault.ts';
+import { VAULT_FORMAT_MARKER, VAULT_FORMAT_VERSION, type VaultFile } from '../../shared/types/vault.ts';
+import type { Assertion } from '../../shared/types/assertion.ts';
 
 async function withTempDir<T>(fn: (dir: string) => Promise<T>): Promise<T> {
   const dir = await mkdtemp(path.join(tmpdir(), 'nayose-vault-test-'));
@@ -147,4 +150,57 @@ test('validateVaultEnvelope rejects non-object values without throwing', () => {
   if (!result.ok) {
     assert.equal(result.error.reason, 'not-a-vault');
   }
+});
+
+test('exportVault writes an envelope built the same way persistSession/writeVaultFile do', async () => {
+  await withTempDir(async (dir) => {
+    const exportPath = path.join(dir, 'export.nayose');
+    const assertions: Assertion[] = [
+      {
+        id: 'a1',
+        entityId: 'e1',
+        fieldName: 'displayName',
+        value: 'Example',
+        actor: 'system',
+        timestamp: '2026-01-01T00:00:00.000Z',
+        source: 'nayose-app',
+        sourceClass: 'user-asserted',
+      },
+    ];
+    const vault: VaultFile = {
+      nayoseVault: VAULT_FORMAT_MARKER,
+      formatVersion: VAULT_FORMAT_VERSION,
+      body: { assertions },
+    };
+
+    await exportVault(exportPath, vault);
+
+    const result = await readVaultFile(exportPath);
+    assert.equal(result.ok, true);
+    if (result.ok) {
+      assert.equal(result.vault.nayoseVault, VAULT_FORMAT_MARKER);
+      assert.equal(result.vault.formatVersion, VAULT_FORMAT_VERSION);
+      assert.deepEqual(result.vault.body.assertions, vault.body.assertions);
+    }
+  });
+});
+
+test('exportVault does not merely copy the source file: the export target has no relation to a source path on disk', async () => {
+  await withTempDir(async (dir) => {
+    // exportVault takes an in-memory VaultFile, not a source file path, so
+    // there is nothing to "copy from" -- this is verified structurally by
+    // the module-source assertion below, and functionally by the fact that
+    // exportVault's signature only accepts (path, vault), never a source path.
+    const exportPath = path.join(dir, 'export2.nayose');
+    const vault = createEmptyVault();
+    await exportVault(exportPath, vault);
+    const result = await readVaultFile(exportPath);
+    assert.equal(result.ok, true);
+  });
+});
+
+test('vault-file.ts never uses fs.copyFile', async () => {
+  const modulePath = fileURLToPath(new URL('./vault-file.ts', import.meta.url));
+  const source = await readFile(modulePath, 'utf-8');
+  assert.doesNotMatch(source, /copyFile/);
 });
