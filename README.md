@@ -79,7 +79,7 @@ npm start              # build main + renderer, then launch the Electron app
 | Script | What it does |
 | --- | --- |
 | `dev:renderer` | Runs the Vite dev server for the renderer in isolation. |
-| `build` | Compiles the main process (`tsc -p tsconfig.main.json`) and builds the renderer (`vite build`). |
+| `build` | Compiles the main process (`tsc -p tsconfig.main.json`, then writes `dist/package.json` to scope the emitted files back to CommonJS — see below) and builds the renderer (`vite build`). |
 | `start` | Runs `build`, then launches the Electron app (`electron .`). |
 | `typecheck` | Type-checks the main and renderer TypeScript projects separately (`tsconfig.main.json` and `tsconfig.renderer.json`). |
 | `test` | Runs the project's test files directly under Node's native test runner (`node --test`). |
@@ -160,3 +160,17 @@ place and report a batch of spurious errors (missing Node/JSX types) that
 `npm run typecheck` does not produce. If you see a wall of editor-only
 errors, check which tsconfig the file resolves to before assuming something
 is broken.
+
+### Module type
+
+The root `package.json` declares `"type": "module"`, so `.ts` files run
+directly by Node — the test files and `scripts/*.ts` — parse as ES modules
+without the `MODULE_TYPELESS_PACKAGE_JSON` reparse warning Node emits
+otherwise. The main process is still compiled to CommonJS
+(`tsconfig.main.json`), because Electron's sandboxed preload loader requires
+it. Node picks a file's module format from the *nearest* `package.json`, so
+`npm run build:main` writes `dist/package.json` (`{"type": "commonjs"}`,
+produced by `scripts/write-dist-scope.ts`) to scope everything `tsc` emits
+there back to CommonJS. electron-builder ships that file via its `dist/**`
+glob, so packaged builds carry the same scoping. Deleting it will break
+`electron .` with `require is not defined`.
