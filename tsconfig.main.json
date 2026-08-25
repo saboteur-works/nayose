@@ -3,6 +3,9 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "Node",
+    // The base config sets noEmit for the editor's tsserver; the main
+    // process build is the one place that must actually emit.
+    "noEmit": false,
     "outDir": "dist",
     "rootDir": "src",
     "types": ["node"],
