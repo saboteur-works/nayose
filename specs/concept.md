@@ -40,7 +40,7 @@ The application is local-first and cross-platform desktop: the vault is a real f
 
 ### MVP — a musician gets their catalog out of five systems and into one file they own
 
-1. **Tier-1 ingest** — Spotify API discography pull, MLC catalog export, and a generic column-mapped CSV/XLSX importer. Solves cold start, the single largest adoption risk; nothing else matters if users must hand-type. Scoped to the best-documented, lowest-friction sources — every other source becomes a preset on the same importer rather than new work (see [ingest-research.md](ingest-research.md)).
+1. **Tier-1 ingest** — Spotify API discography pull, MLC catalog export, and a generic column-mapped CSV/XLSX importer. Solves cold start, the single largest adoption risk; nothing else matters if users must hand-type. Scoped to the best-documented, lowest-friction sources — every other source becomes a preset on the same importer rather than new work (see [ingest-research.md](../docs/ingest-research.md)).
 2. **Assertion-log vault with provenance** — the core data commitment; cannot be retrofitted later without losing history.
 3. **Complete free export in a published format** — the custody promise is the differentiator, and a promise deferred is not credible.
 4. **Music catalog view** (works, recordings, releases, parties, registrations) — the minimum surface to see what you have.
@@ -87,7 +87,7 @@ The application is local-first and cross-platform desktop: the vault is a real f
 ## Caveats & Pitfalls
 
 - **Adoption:** the chosen framing — pure substrate, with MLC recovery as a separate product — leaves this app without a painkiller pitch. "A central place for your metadata" describes a category, not a pain, and categories convert badly. Something must supply urgency at the top of the funnel; if not royalty recovery, then the concrete answer needs naming before spec.
-- **Cold start is the whole battle.** If a user must hand-enter 60 ISRCs, they leave in the first session. Research (2026-08-21, see [ingest-research.md](ingest-research.md)) establishes viable ingest paths on both sides of the model, so this risk is reduced but not eliminated: the residual gap is unreleased work, non-DSP work, and per-track credits, none of which any export covers.
+- **Cold start is the whole battle.** If a user must hand-enter 60 ISRCs, they leave in the first session. Research (2026-08-21, see [ingest-research.md](../docs/ingest-research.md)) establishes viable ingest paths on both sides of the model, so this risk is reduced but not eliminated: the residual gap is unreleased work, non-DSP work, and per-track credits, none of which any export covers.
 - **Staleness makes the vault actively harmful.** A vault nobody opens becomes confidently wrong, and unlike a wrong password, it fails silently on a multi-year delay. If v1's verification loop does not work, MVP has shipped a nicer spreadsheet that lies.
 - **The extension is a permanent maintenance treadmill** against DOMs owned by others, plus Manifest V3 churn and store review scrutiny for an extension that reads financial portals. Scope host permissions to a declared registry list; expect adapters to be disposable.
 - **Correctness is a trust liability.** Telling a user their split is 50/50 when it isn't is unrecoverable. Provenance and confirmation flows are load-bearing, not polish.

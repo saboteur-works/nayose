@@ -2,7 +2,7 @@
 
 **Milestone scope:** MVP only. v1 and v2 requirements are listed under Out of Scope (Deferred).
 **Status:** Draft
-**Source concept:** Nayose — `docs/concept.md`, with ingest findings in `docs/ingest-research.md`
+**Source concept:** Nayose — `specs/concept.md`, with ingest findings in `docs/ingest-research.md`
 
 ## Overview
 
@@ -141,7 +141,7 @@ Holds roughly 20–200 recordings, distributes through a service such as DistroK
 **Becomes live at:** Feature 3, when its preset set is scoped.
 
 **OQ-4: Where does acquisition urgency come from, given MLC recovery is a separate product? — DEFERRED**
-**Impact:** No functional requirement, but the concept identifies this as the primary adoption risk. Affects onboarding design and launch positioning. Verified: no functional requirement cites it, and none of Feature 1's 13 tasks touch onboarding copy or acquisition positioning. docs/concept.md line 89 frames this as the primary adoption risk, so deferral is a scheduling decision, not a dismissal.
+**Impact:** No functional requirement, but the concept identifies this as the primary adoption risk. Affects onboarding design and launch positioning. Verified: no functional requirement cites it, and none of Feature 1's 13 tasks touch onboarding copy or acquisition positioning. specs/concept.md line 89 frames this as the primary adoption risk, so deferral is a scheduling decision, not a dismissal.
 **Owner:** Product
 **Becomes live at:** When onboarding and launch positioning are designed — likely once Feature 1 is demoable, and necessarily before public launch.
 

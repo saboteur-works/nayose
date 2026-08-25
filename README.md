@@ -13,7 +13,7 @@ elsewhere has drifted from what they believe. Nayose stores one portable
 record of a creator's identifiers and registration state, on their own disk,
 that outlives any platform they use.
 
-See [`docs/concept.md`](docs/concept.md) for the full problem statement and
+See [`specs/concept.md`](specs/concept.md) for the full problem statement and
 product framing.
 
 ## Status: Features 1 and 2
@@ -127,7 +127,7 @@ job in `.github/workflows/build.yml`).
 Documentation of what to build lives under `specs/`, in a fixed rung
 structure, each rung tracing to the one above it:
 
-1. **Concept** — [`docs/concept.md`](docs/concept.md) — the product idea and
+1. **Concept** — [`specs/concept.md`](specs/concept.md) — the product idea and
    the "why."
 2. **Product spec** — [`specs/product/nayose.md`](specs/product/nayose.md) —
    the full MVP/v1/v2 requirement set for Nayose as a product.

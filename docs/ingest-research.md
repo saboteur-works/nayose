@@ -1,6 +1,6 @@
 # Ingest Research
 
-*Researched 2026-08-21. Supports MVP feature #1 in [concept.md](concept.md).*
+*Researched 2026-08-21. Supports MVP feature #1 in [concept.md](../specs/concept.md).*
 
 ## Scope and confidence
 
